@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Admin - Toko Tama</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #0b0d0f; color: white; padding: 20px; max-width: 500px; margin: auto; overflow-x: hidden; }
+
+        /* --- UI LOGIN (TAMBAHAN) --- */
+        #loginSection { 
+            height: 100vh; display: flex; align-items: center; justify-content: center; 
+            position: fixed; top: 0; left: 0; width: 100%; background: #0b0d0f; z-index: 99999; 
+        }
+        .login-card { background: #161a1e; padding: 35px; border-radius: 30px; border: 1px solid #242a32; width: 90%; max-width: 400px; text-align: center; }
+        .login-card h2 { margin-bottom: 20px; color: #f5b041; }
+        .login-error { color: #ef4444; font-size: 12px; margin-bottom: 15px; display: none; font-weight: bold; }
+        .btn-login { background: #f5b041; color: #000; border: none; padding: 15px; border-radius: 15px; font-weight: 900; width: 100%; cursor: pointer; margin-top: 10px; }
+
+        /* --- CSS ADMIN ASLI (JANGAN DIGANTI) --- */
+        .menu-wrapper { position: fixed; top: 20px; right: 20px; z-index: 10002; }
+        #menuToggle { display: none; }
+        .hamburger { width: 45px; height: 45px; background: #161a1e; border: 1px solid #242a32; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: 0.3s; }
+        .hamburger span { display: block; width: 20px; height: 2px; background: #f5b041; border-radius: 2px; transition: 0.3s; }
+        
+        .nav-menu { position: fixed; top: 75px; right: -250px; width: 200px; background: #161a1e; border: 1px solid #242a32; border-radius: 20px; padding: 15px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #menuToggle:checked ~ .nav-menu { right: 20px; }
+        #menuToggle:checked ~ .hamburger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+        #menuToggle:checked ~ .hamburger span:nth-child(2) { opacity: 0; }
+        #menuToggle:checked ~ .hamburger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+        .nav-menu a { display: block; color: #8e959e; text-decoration: none; padding: 12px; font-size: 13px; font-weight: 800; border-radius: 12px; transition: 0.2s; }
+        .nav-menu a:hover { background: #242a32; color: #f5b041; }
+
+        .admin-toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 12px 25px; border-radius: 12px; font-size: 13px; font-weight: bold; z-index: 20000; transition: 0.5s; }
+        .admin-toast.show { top: 30px; }
+
+        .product-item { background: #161a1e; border: 1px solid #242a32; border-radius: 24px; padding: 18px; display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .prod-info { flex: 1; }
+        .action-btns { display: flex; flex-direction: column; gap: 8px; }
+        
+        .btn-edit-small { background: rgba(245, 176, 65, 0.1); color: #f5b041; border: 1px solid rgba(245, 176, 65, 0.2); padding: 8px 15px; border-radius: 12px; font-size: 10px; font-weight: 800; cursor: pointer; }
+        
+        .btn-del-small { 
+            background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); 
+            padding: 8px 15px; border-radius: 12px; font-size: 10px; font-weight: 800; cursor: pointer; 
+            transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .btn-del-small:hover { background: #ef4444; color: white; transform: scale(1.05); }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); z-index: 15000; align-items: center; justify-content: center; }
+        .form-container, .confirm-card { background: #161a1e; width: 90%; max-width: 400px; padding: 30px; border-radius: 30px; border: 1px solid #242a32; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        input, textarea { width: 100%; background: #0b0d0f; border: 2px solid #242a32; padding: 14px; color: white; border-radius: 14px; outline: none; margin-bottom: 12px; font-size: 14px; }
+        input:focus { border-color: #f5b041; }
+        
+        .btn-add-new { background: linear-gradient(135deg, #4f46e5, #3b82f6); color: white; border: none; padding: 18px; border-radius: 20px; width: 100%; font-weight: 900; margin-bottom: 25px; cursor: pointer; }
+
+        .confirm-card { text-align: center; border: 1px solid #331111; }
+        .btn-flex { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-back-modal { flex: 1; background: #242a32; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; cursor: pointer; }
+        .btn-confirm-del { flex: 1; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="loginSection">
+        <div class="login-card">
+            <h2>Admin Login</h2>
+            <div id="loginError" class="login-error">Kredensial Salah! ❌</div>
+            <input type="text" id="authUser" placeholder="Username">
+            <input type="password" id="authPass" placeholder="Password">
+            <input type="number" id="authPin" placeholder="PIN Keamanan">
+            <button class="btn-login" onclick="cekAkses()">MASUK</button>
+        </div>
+    </div>
+
+    <div id="adminToast" class="admin-toast">Berhasil ✨</div>
+
+    <div class="menu-wrapper">
+        <input type="checkbox" id="menuToggle">
+        <label for="menuToggle" class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </label>
+        <div class="nav-menu">
+            <a href="database.html">📊 Database Viewer</a>
+            <a href="keuntungan.html">💰 Keuntungan</a>
+            <hr style="border: 0; border-top: 1px solid #242a32; margin: 5px 0;">
+            <a href="#" onclick="localStorage.clear(); location.reload();">🚪 Logout</a>
+            <a href="index.html">🏠 Ke Toko</a>
+        </div>
+    </div>
+
+    <div class="header" style="text-align: center; padding: 20px 0;">
+        <div style="width: 65px; height: 65px; border-radius: 50%; border: 2px solid #f5b041; background: #222; margin: 0 auto 10px auto; overflow: hidden;">
+            <img src="https://via.placeholder.com/100" width="100%">
+        </div>
+        <h2 style="font-size: 1.2rem;">Toko Tama Admin</h2>
+    </div>
+
+    <button class="btn-add-new" onclick="openForm()">+ TAMBAH PRODUK BARU</button>
+
+    <div style="font-size: 11px; color: #555; text-transform: uppercase; margin-bottom: 15px; font-weight: 800; letter-spacing: 1px;">Inventori Aktif</div>
+    <div id="adminProductList"></div>
+
+    <div id="formModal" class="modal-overlay" style="align-items: flex-end;">
+        <div class="form-container" style="max-width: 500px; border-radius: 35px 35px 0 0; width: 100%;">
+            <h3 id="formTitle" style="margin-bottom: 20px; color: #f5b041;">Kelola Produk</h3>
+            <input type="text" id="prodId" placeholder="ID Produk">
+            <input type="text" id="prodNama" placeholder="Nama Produk">
+            <input type="text" id="prodHarga" placeholder="Harga Jual">
+            <input type="text" id="prodDesc" placeholder="Deskripsi">
+            <textarea id="accData" placeholder="Data Akun (Baris Baru untuk banyak)"></textarea>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="updateInfo()" id="mainBtn" style="flex:1; background:#f5b041; border:none; padding:15px; border-radius:15px; font-weight:900; cursor:pointer;">UPDATE</button>
+                <button onclick="tambahStok()" id="stokBtn" style="flex:1; background:#10b981; border:none; color:white; padding:15px; border-radius:15px; font-weight:900; cursor:pointer;">+ STOK</button>
+            </div>
+            <button onclick="closeForm()" style="width:100%; background:none; border:none; color:#ef4444; margin-top:20px; font-weight:800; cursor:pointer;">BATAL</button>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay">
+        <div class="confirm-card">
+            <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
+            <h3 style="color: #ef4444; margin-bottom: 10px;">Hapus Produk?</h3>
+            <p style="font-size: 13px; color: #8e959e;">Seluruh data stok dan informasi produk ini akan dihapus permanen.</p>
+            <div class="btn-flex">
+                <button class="btn-back-modal" onclick="closeConfirm()">KEMBALI</button>
+                <button id="btnConfirmDelete" class="btn-confirm-del">IYA, HAPUS</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/";
+
+        // --- LOGIKA LOGIN (PENGHUBUNG) ---
+        async function cekAkses() {
+            const u = document.getElementById('authUser').value;
+            const p = document.getElementById('authPass').value;
+            const pin = document.getElementById('authPin').value;
+            const err = document.getElementById('loginError');
+
+            try {
+                const res = await fetch(`${BASE_URL}admin_config.json`);
+                const db = await res.json();
+
+                if (u === db.username && p === db.password && parseInt(pin) === db.pin) {
+                    localStorage.setItem('tama_admin_session', 'active');
+                    document.getElementById('loginSection').style.display = 'none';
+                    loadList(); // Panggil fungsi list bawaan lo
+                } else {
+                    err.style.display = 'block';
+                }
+            } catch (e) { alert("Gagal koneksi ke database!"); }
+        }
+
+        // Cek Sesi pas buka halaman
+        if (localStorage.getItem('tama_admin_session') === 'active') {
+            document.getElementById('loginSection').style.display = 'none';
+        }
+
+        // --- SISA KODE ASLI LO (TIDAK ADA YANG BERUBAH) ---
+        let targetDeleteId = null;
+
+        function openForm() { resetForm(); document.getElementById('formModal').style.display = 'flex'; }
+        function closeForm() { document.getElementById('formModal').style.display = 'none'; }
+        function closeConfirm() { document.getElementById('confirmModal').style.display = 'none'; targetDeleteId = null; }
+
+        function showToast(msg) {
+            const t = document.getElementById('adminToast');
+            t.innerText = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        async function updateInfo() {
+            const id = document.getElementById('prodId').value.trim();
+            if(!id) return;
+            const data = { 
+                nama: document.getElementById('prodNama').value, 
+                harga: document.getElementById('prodHarga').value, 
+                deskripsi: document.getElementById('prodDesc').value 
+            };
+            await fetch(`${BASE_URL}produk/${id}.json`, { method: 'PUT', body: JSON.stringify(data) });
+            showToast("Berhasil Terupdate! ✨"); closeForm(); loadList();
+        }
+
+        async function tambahStok() {
+            const id = document.getElementById('prodId').value.trim();
+            const dataRaw = document.getElementById('accData').value.trim();
+            if(!id || !dataRaw) return;
+            
+            const lines = dataRaw.split('\n');
+            for(let line of lines) {
+                if(line.trim()) {
+                    await fetch(`${BASE_URL}stok_akun/${id}.json`, { method: 'POST', body: JSON.stringify(line.trim()) });
+                }
+            }
+            showToast(lines.length + " Stok Masuk! 🚀"); document.getElementById('accData').value = ""; loadList();
+        }
+
+        async function loadList() {
+            const container = document.getElementById('adminProductList');
+            if (localStorage.getItem('tama_admin_session') !== 'active') return;
+
+            const [resP, resS] = await Promise.all([fetch(`${BASE_URL}produk.json`), fetch(`${BASE_URL}stok_akun.json`)]);
+            const dataP = await resP.json(); const dataS = await resS.json() || {};
+            
+            container.innerHTML = '';
+            if(!dataP) return container.innerHTML = "<p style='text-align:center; opacity:0.3;'>Belum ada produk.</p>";
+            
+            Object.keys(dataP).forEach(id => {
+                const p = dataP[id]; const jml = dataS[id] ? Object.keys(dataS[id]).length : 0;
+                container.innerHTML += `
+                    <div class="product-item">
+                        <div class="prod-info">
+                            <h4 style="font-size:15px;">${p.nama}</h4>
+                            <span style="font-size:10px; color:${jml==0?'#ef4444':'#10b981'}; font-weight:900;">${jml} UNIT READY</span>
+                        </div>
+                        <div class="action-btns">
+                            <button class="btn-edit-small" onclick="siapkanEdit('${id}','${p.nama}','${p.harga}','${p.deskripsi}')">EDIT</button>
+                            <button class="btn-del-small" onclick="askHapus('${id}')">🗑️ HAPUS</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function askHapus(id) {
+            targetDeleteId = id;
+            document.getElementById('confirmModal').style.display = 'flex';
+            document.getElementById('btnConfirmDelete').onclick = confirmDelete;
+        }
+
+        async function confirmDelete() {
+            if(!targetDeleteId) return;
+            const btn = document.getElementById('btnConfirmDelete');
+            btn.innerText = "..."; btn.disabled = true;
+
+            await Promise.all([
+                fetch(`${BASE_URL}produk/${targetDeleteId}.json`, { method: 'DELETE' }),
+                fetch(`${BASE_URL}stok_akun/${targetDeleteId}.json`, { method: 'DELETE' })
+            ]);
+
+            btn.innerText = "IYA, HAPUS"; btn.disabled = false;
+            closeConfirm(); loadList(); showToast("Produk Dimusnahkan 💀");
+        }
+
+        function siapkanEdit(id, n, h, d) {
+            document.getElementById('prodId').value = id; document.getElementById('prodNama').value = n;
+            document.getElementById('prodHarga').value = h; document.getElementById('prodDesc').value = d;
+            document.getElementById('prodId').readOnly = true;
+            document.getElementById('formModal').style.display = 'flex';
+        }
+
+        function resetForm() {
+            document.getElementById('prodId').value = ""; document.getElementById('prodNama').value = "";
+            document.getElementById('prodHarga').value = ""; document.getElementById('prodDesc').value = "";
+            document.getElementById('prodId').readOnly = false;
+        }
+
+        loadList();
+    </script>
+</body>
+</html>
