@@ -6,194 +6,153 @@
     <title>Database Viewer — Toko Tama</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0b0d0f; color: #fff; min-height: 100vh; padding: 20px; }
+        body { background: #0b0d0f; color: #fff; min-height: 100vh; padding: 20px; max-width: 600px; margin: auto; overflow-x: hidden; }
 
-        .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-        .topbar h1 { font-size: 1.2rem; font-weight: 700; }
-        .topbar span { font-size: 11px; color: #8e959e; background: #161a1e; border: 1px solid #242a32; padding: 4px 10px; border-radius: 20px; }
+        /* --- MENU HAMBURGER & NAV --- */
+        .menu-wrapper { position: fixed; top: 20px; right: 20px; z-index: 10002; }
+        #menuToggle { display: none; }
+        .hamburger { width: 45px; height: 45px; background: #161a1e; border: 1px solid #242a32; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+        .hamburger span { display: block; width: 20px; height: 2px; background: #f5b041; border-radius: 2px; }
+        
+        .nav-menu { position: fixed; top: 75px; right: -250px; width: 200px; background: #161a1e; border: 1px solid #242a32; border-radius: 20px; padding: 15px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10003; }
+        #menuToggle:checked ~ .nav-menu { right: 20px; }
 
-        .btn-refresh { margin-left: auto; background: #f5b041; color: #000; border: none; padding: 9px 18px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .btn-refresh:hover { background: #e8a030; }
-        .btn-refresh:active { transform: scale(0.97); }
+        .nav-menu a { display: block; color: #8e959e; text-decoration: none; padding: 12px; font-size: 13px; font-weight: 800; border-radius: 12px; }
+        .nav-menu a:hover { background: #242a32; color: #f5b041; }
 
-        /* Tabs */
-        .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-        .tab { background: #161a1e; border: 1px solid #242a32; color: #8e959e; padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; position: relative; }
-        .tab:hover { border-color: #f5b041; color: #f5b041; }
-        .tab.active { background: #f5b041; color: #000; border-color: #f5b041; }
-        .tab .badge { position: absolute; top: -6px; right: -6px; background: #ef4444; color: #fff; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 10px; }
-        .tab.active .badge { background: #000; color: #f5b041; }
+        /* --- TOPBAR --- */
+        .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; padding-right: 60px; }
+        .topbar h1 { font-size: 1.2rem; font-weight: 800; }
+        .topbar span { font-size: 10px; color: #8e959e; background: #161a1e; border: 1px solid #242a32; padding: 4px 10px; border-radius: 20px; }
 
-        /* Section */
-        .section { display: none; }
-        .section.active { display: block; }
+        .btn-refresh { background: #f5b041; color: #000; border: none; padding: 10px 14px; border-radius: 12px; font-size: 14px; cursor: pointer; margin-left: auto; }
 
-        /* Search */
-        .search-bar { width: 100%; background: #161a1e; border: 2px solid #242a32; padding: 12px 16px; color: #fff; border-radius: 12px; outline: none; font-size: 13px; margin-bottom: 16px; }
-        .search-bar:focus { border-color: #f5b041; }
-
-        /* Table */
-        .table-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid #242a32; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
-        thead tr { background: #1a1f26; }
-        th { padding: 12px 16px; text-align: left; font-size: 10px; text-transform: uppercase; color: #8e959e; font-weight: 800; letter-spacing: 0.5px; white-space: nowrap; }
-        tbody tr { border-top: 1px solid #1c2127; transition: background 0.15s; }
-        tbody tr:hover { background: #161a1e; }
-        td { padding: 12px 16px; vertical-align: top; }
-        td.mono { font-family: monospace; font-size: 12px; color: #f5b041; word-break: break-all; max-width: 220px; }
-        td.muted { color: #8e959e; font-size: 12px; }
-        td.id-col { font-family: monospace; font-size: 11px; color: #4f46e5; max-width: 130px; word-break: break-all; }
-
-        .pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; }
-        .pill-green { background: rgba(6,78,59,0.3); color: #10b981; }
-        .pill-red   { background: rgba(127,29,29,0.3); color: #ef4444; }
-        .pill-blue  { background: rgba(79,70,229,0.15); color: #818cf8; }
-
-        /* Empty / Loading */
-        .empty { text-align: center; padding: 60px 20px; color: #8e959e; }
-        .empty svg { margin-bottom: 12px; opacity: 0.3; }
-        .loading { text-align: center; padding: 60px 20px; color: #8e959e; }
-        .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid #242a32; border-top-color: #f5b041; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Stats strip */
-        .stats-strip { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-        .stat-chip { background: #161a1e; border: 1px solid #242a32; border-radius: 10px; padding: 10px 16px; flex: 1; min-width: 100px; }
-        .stat-chip .val { font-size: 20px; font-weight: 800; color: #f5b041; }
-        .stat-chip .lbl { font-size: 10px; color: #8e959e; text-transform: uppercase; margin-top: 2px; }
-
-        /* Raw JSON viewer */
-        .json-box { background: #0d1117; border: 1px solid #242a32; border-radius: 14px; padding: 20px; font-family: monospace; font-size: 12px; line-height: 1.7; overflow-x: auto; white-space: pre-wrap; word-break: break-all; color: #c9d1d9; max-height: 600px; overflow-y: auto; }
-        .json-key { color: #79c0ff; }
-        .json-str { color: #a5d6ff; }
-        .json-num { color: #f2cc60; }
-        .json-bool { color: #ff7b72; }
-        .json-null { color: #8e959e; }
-
-        /* Action buttons in table */
-        .btn-del { background: rgba(127,29,29,0.3); color: #ef4444; border: none; padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .btn-del:hover { background: rgba(127,29,29,0.6); }
-
-        /* Toast */
-        .toast { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); background: #10b981; color: #fff; padding: 10px 22px; border-radius: 12px; font-size: 13px; font-weight: 700; z-index: 9999; transition: 0.4s; white-space: nowrap; }
-        .toast.show { top: 20px; }
-        .toast.err { background: #ef4444; }
-
-        @media (max-width: 480px) {
-            .topbar h1 { font-size: 1rem; }
-            th, td { padding: 10px 12px; }
+        /* --- FIX: TABS & BADGE (BIAR NGGAK KEPOTONG) --- */
+        .tabs { 
+            display: flex; 
+            gap: 12px; 
+            overflow-x: auto; 
+            padding: 10px 5px; /* Tambah padding biar badge punya ruang */
+            margin-bottom: 20px; 
+            scrollbar-width: none; 
         }
+        .tabs::-webkit-scrollbar { display: none; }
+
+        .tab { 
+            background: #161a1e; 
+            border: 1px solid #242a32; 
+            color: #8e959e; 
+            padding: 10px 20px; 
+            border-radius: 12px; 
+            font-size: 12px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            white-space: nowrap; 
+            position: relative; /* Penting untuk posisi badge */
+            transition: 0.2s;
+        }
+        .tab.active { background: #f5b041; color: #000; border-color: #f5b041; }
+
+        .tab .badge { 
+            position: absolute; 
+            top: -8px; /* Geser lebih ke atas */
+            right: -5px; /* Geser lebih ke kanan */
+            background: #ef4444; 
+            color: #fff; 
+            font-size: 10px; 
+            min-width: 18px; 
+            height: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 50%; /* Biar bulat sempurna */
+            border: 2px solid #0b0d0f; /* Kasih outline biar kontras */
+            font-weight: 900;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .tab.active .badge { border-color: #f5b041; }
+
+        /* --- CONTENT & TABLES --- */
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .search-bar { width: 100%; background: #161a1e; border: 2px solid #242a32; padding: 14px; color: #fff; border-radius: 15px; outline: none; font-size: 13px; margin-bottom: 20px; }
+
+        .table-wrap { overflow-x: auto; border-radius: 18px; border: 1px solid #242a32; background: #161a1e; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 450px; }
+        th { padding: 15px; text-align: left; background: #1a1f26; color: #8e959e; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 15px; border-top: 1px solid #242a32; vertical-align: middle; }
+        td.mono { font-family: monospace; color: #f5b041; }
+
+        .btn-del { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
+
+        .toast { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); background: #10b981; color: #fff; padding: 12px 25px; border-radius: 15px; font-size: 13px; font-weight: 700; z-index: 20000; transition: 0.5s; }
+        .toast.show { top: 30px; }
     </style>
 </head>
 <body>
 
 <div id="toast" class="toast">OK</div>
 
-<div class="topbar">
-    <h1>🗄️ Database Viewer</h1>
-    <span>Toko Tama</span>
-    <button class="btn-refresh" onclick="loadAll()">↻ Refresh</button>
+<div class="menu-wrapper">
+    <input type="checkbox" id="menuToggle">
+    <label for="menuToggle" class="hamburger">
+        <span></span><span></span><span></span>
+    </label>
+    <div class="nav-menu">
+        <a href="index.html">⚙️ Owner Panel</a>
+        <a href="keuntungan.html">💰 Keuntungan</a>
+        <hr style="border: 0; border-top: 1px solid #242a32; margin: 5px 0;">
+        <a href="https://cemastore.vercel.app/" target="_blank">🏠 Ke Toko</a>
+    </div>
 </div>
 
-<!-- Tabs -->
+<div class="topbar">
+    <h1>🗄️ Database</h1>
+    <span>Toko Tama</span>
+    <button class="btn-refresh" onclick="loadAll()">↻</button>
+</div>
+
 <div class="tabs">
     <div class="tab active" onclick="switchTab('produk')" id="tab-produk">📦 Produk <span class="badge" id="badge-produk">0</span></div>
-    <div class="tab" onclick="switchTab('stok')" id="tab-stok">🗂️ Stok Akun <span class="badge" id="badge-stok">0</span></div>
-    <div class="tab" onclick="switchTab('transaksi')" id="tab-transaksi">💳 Transaksi <span class="badge" id="badge-transaksi">0</span></div>
-    <div class="tab" onclick="switchTab('raw')" id="tab-raw">{ } Raw JSON</div>
+    <div class="tab" onclick="switchTab('stok')" id="tab-stok">🗂️ Stok <span class="badge" id="badge-stok">0</span></div>
+    <div class="tab" onclick="switchTab('transaksi')" id="tab-transaksi">💳 TRX <span class="badge" id="badge-transaksi">0</span></div>
+    <div class="tab" onclick="switchTab('raw')" id="tab-raw">{ } Raw</div>
 </div>
 
-<!-- ═══ TAB: PRODUK ═══ -->
 <div class="section active" id="section-produk">
-    <div class="stats-strip" id="stats-produk"></div>
-    <input class="search-bar" placeholder="🔍  Cari produk..." oninput="filterTable('tbl-produk', this.value)">
+    <input class="search-bar" placeholder="🔍 Cari produk..." oninput="filterTable('tbl-produk', this.value)">
     <div class="table-wrap">
         <table id="tbl-produk">
-            <thead><tr>
-                <th>ID</th>
-                <th>Nama Produk</th>
-                <th>Harga</th>
-                <th>Deskripsi</th>
-                <th>Stok</th>
-            </tr></thead>
-            <tbody id="body-produk"><tr><td colspan="5"><div class="loading"><div class="spinner"></div><br>Memuat...</div></td></tr></tbody>
+            <thead><tr><th>ID</th><th>Nama</th><th>Harga</th><th>Stok</th></tr></thead>
+            <tbody id="body-produk"></tbody>
         </table>
     </div>
 </div>
 
-<!-- ═══ TAB: STOK AKUN ═══ -->
 <div class="section" id="section-stok">
-    <div class="stats-strip" id="stats-stok"></div>
-    <input class="search-bar" placeholder="🔍  Cari stok / data akun..." oninput="filterTable('tbl-stok', this.value)">
-    <div class="table-wrap">
-        <table id="tbl-stok">
-            <thead><tr>
-                <th>Produk ID</th>
-                <th>Nama Produk</th>
-                <th>Akun ID</th>
-                <th>Data Akun</th>
-                <th>Aksi</th>
-            </tr></thead>
-            <tbody id="body-stok"><tr><td colspan="5"><div class="loading"><div class="spinner"></div><br>Memuat...</div></td></tr></tbody>
-        </table>
-    </div>
+    <input class="search-bar" placeholder="🔍 Cari akun..." oninput="filterTable('tbl-stok', this.value)">
+    <div class="table-wrap"><table id="tbl-stok"><thead><tr><th>Produk</th><th>Data</th><th>Aksi</th></tr></thead><tbody id="body-stok"></tbody></table></div>
 </div>
 
-<!-- ═══ TAB: TRANSAKSI ═══ -->
 <div class="section" id="section-transaksi">
-    <div class="stats-strip" id="stats-transaksi"></div>
-    <input class="search-bar" placeholder="🔍  Cari nama, produk, ID..." oninput="filterTable('tbl-transaksi', this.value)">
-    <div class="table-wrap">
-        <table id="tbl-transaksi">
-            <thead><tr>
-                <th>TRX ID</th>
-                <th>Nama Pembeli</th>
-                <th>Email</th>
-                <th>Produk</th>
-                <th>Data Akun</th>
-                <th>Tanggal</th>
-                <th>Aksi</th>
-            </tr></thead>
-            <tbody id="body-transaksi"><tr><td colspan="7"><div class="loading"><div class="spinner"></div><br>Memuat...</div></td></tr></tbody>
-        </table>
-    </div>
+    <input class="search-bar" placeholder="🔍 Cari TRX..." oninput="filterTable('tbl-transaksi', this.value)">
+    <div class="table-wrap"><table id="tbl-transaksi"><thead><tr><th>ID</th><th>Pembeli</th><th>Produk</th><th>Aksi</th></tr></thead><tbody id="body-transaksi"></tbody></table></div>
 </div>
 
-<!-- ═══ TAB: RAW JSON ═══ -->
 <div class="section" id="section-raw">
-    <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-        <button onclick="showRaw('all')"    class="btn-refresh" style="background:#4f46e5; color:#fff;">Semua</button>
-        <button onclick="showRaw('produk')" class="btn-refresh" style="background:#161a1e; color:#f5b041; border:1px solid #242a32;">Produk</button>
-        <button onclick="showRaw('stok_akun')" class="btn-refresh" style="background:#161a1e; color:#f5b041; border:1px solid #242a32;">Stok</button>
-        <button onclick="showRaw('transaksi')" class="btn-refresh" style="background:#161a1e; color:#f5b041; border:1px solid #242a32;">Transaksi</button>
-        <button onclick="copyRaw()" class="btn-refresh" style="background:#242a32; color:#fff;">📋 Copy</button>
-    </div>
-    <div class="json-box" id="rawBox">Klik tombol di atas untuk melihat data.</div>
+    <button onclick="showRaw()" class="btn-refresh" style="margin-bottom:10px; width:100%;">Tampilkan Semua Data JSON</button>
+    <pre id="rawBox" style="background:#0d1117; padding:15px; border-radius:15px; font-size:11px; overflow-x:auto; border:1px solid #242a32; color:#a5d6ff;"></pre>
 </div>
 
 <script>
     const BASE_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/";
-
-    // Cache data
     let DB = { produk: {}, stok_akun: {}, transaksi: {} };
 
-    // ── TOAST ────────────────────────────────────────────────
-    function toast(msg, err = false) {
-        const t = document.getElementById('toast');
-        t.innerText = msg;
-        t.className = "toast" + (err ? " err" : "") + " show";
-        setTimeout(() => t.className = "toast" + (err ? " err" : ""), 2500);
-    }
+    // Proteksi Login
+    if (localStorage.getItem('tama_admin_session') !== 'active') { window.location.href = "index.html"; }
 
-    // ── SWITCH TAB ───────────────────────────────────────────
-    function switchTab(name) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('tab-' + name).classList.add('active');
-        document.getElementById('section-' + name).classList.add('active');
-    }
-
-    // ── LOAD ALL ─────────────────────────────────────────────
     async function loadAll() {
         try {
             const [rP, rS, rT] = await Promise.all([
@@ -201,205 +160,79 @@
                 fetch(`${BASE_URL}stok_akun.json`),
                 fetch(`${BASE_URL}transaksi.json`)
             ]);
-            DB.produk     = await rP.json() || {};
-            DB.stok_akun  = await rS.json() || {};
-            DB.transaksi  = await rT.json() || {};
-
-            renderProduk();
-            renderStok();
-            renderTransaksi();
-            toast("Data berhasil dimuat ✓");
-        } catch (e) {
-            console.error(e);
-            toast("Gagal memuat data!", true);
-        }
+            DB.produk = await rP.json() || {};
+            DB.stok_akun = await rS.json() || {};
+            DB.transaksi = await rT.json() || {};
+            renderAll();
+            toast("Data Updated! ✨");
+        } catch (e) { toast("Gagal memuat!", true); }
     }
 
-    // ── FORMAT HARGA ─────────────────────────────────────────
-    function fmtHarga(h) {
-        const n = parseInt(String(h).replace(/\D/g, '') || 0);
-        return "Rp " + n.toLocaleString('id-ID');
+    function switchTab(name) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        document.getElementById('section-' + name).classList.add('active');
     }
 
-    // ── RENDER PRODUK ────────────────────────────────────────
-    function renderProduk() {
-        const tbody = document.getElementById('body-produk');
-        const data  = DB.produk;
-        const stok  = DB.stok_akun;
-
-        if (!data || Object.keys(data).length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5"><div class="empty">📦<br>Belum ada produk</div></td></tr>`;
-            document.getElementById('badge-produk').innerText = 0;
-            document.getElementById('stats-produk').innerHTML = '';
-            return;
-        }
-
-        let html = '';
-        let totalHabis = 0, totalReady = 0;
-
-        Object.keys(data).forEach(id => {
-            const p       = data[id];
-            const listAkun = stok[id] ? Object.keys(stok[id]) : [];
-            const jml      = listAkun.length;
-            if (jml === 0) totalHabis++; else totalReady++;
-
-            html += `<tr>
-                <td class="id-col">${id}</td>
-                <td><b>${esc(p.nama || '-')}</b></td>
-                <td style="color:#f5b041; font-weight:700;">${fmtHarga(p.harga)}</td>
-                <td class="muted">${esc(p.deskripsi || '-')}</td>
-                <td><span class="pill ${jml === 0 ? 'pill-red' : 'pill-green'}">${jml === 0 ? '⚠ Habis' : jml + ' Ready'}</span></td>
-            </tr>`;
+    function renderAll() {
+        // Render Produk
+        const bP = document.getElementById('body-produk');
+        bP.innerHTML = '';
+        Object.keys(DB.produk).forEach(id => {
+            const p = DB.produk[id];
+            const s = DB.stok_akun[id] ? Object.keys(DB.stok_akun[id]).length : 0;
+            bP.innerHTML += `<tr><td class="mono">${id}</td><td><b>${p.nama}</b></td><td style="color:#f5b041;">${p.harga}</td><td>${s} Unit</td></tr>`;
         });
+        document.getElementById('badge-produk').innerText = Object.keys(DB.produk).length;
 
-        tbody.innerHTML = html;
-        const total = Object.keys(data).length;
-        document.getElementById('badge-produk').innerText = total;
-        document.getElementById('stats-produk').innerHTML = `
-            <div class="stat-chip"><div class="val">${total}</div><div class="lbl">Total Produk</div></div>
-            <div class="stat-chip"><div class="val">${totalReady}</div><div class="lbl">Ada Stok</div></div>
-            <div class="stat-chip"><div class="val" style="color:#ef4444">${totalHabis}</div><div class="lbl">Stok Habis</div></div>`;
-    }
-
-    // ── RENDER STOK AKUN ─────────────────────────────────────
-    function renderStok() {
-        const tbody = document.getElementById('body-stok');
-        const stok  = DB.stok_akun;
-        const prod  = DB.produk;
-
-        if (!stok || Object.keys(stok).length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5"><div class="empty">🗂️<br>Stok kosong</div></td></tr>`;
-            document.getElementById('badge-stok').innerText = 0;
-            document.getElementById('stats-stok').innerHTML = '';
-            return;
-        }
-
-        let html = '';
-        let totalAkun = 0;
-
-        Object.keys(stok).forEach(prodId => {
-            const akuns    = stok[prodId];
-            const namaProd = prod[prodId]?.nama || prodId;
-            Object.keys(akuns).forEach(akunId => {
-                totalAkun++;
-                html += `<tr>
-                    <td class="id-col">${prodId}</td>
-                    <td><b>${esc(namaProd)}</b></td>
-                    <td class="id-col">${akunId}</td>
-                    <td class="mono">${esc(akuns[akunId])}</td>
-                    <td><button class="btn-del" onclick="hapusStok('${prodId}','${akunId}')">🗑 Hapus</button></td>
-                </tr>`;
+        // Render Stok
+        const bS = document.getElementById('body-stok'); bS.innerHTML = '';
+        let countS = 0;
+        Object.keys(DB.stok_akun).forEach(pId => {
+            Object.keys(DB.stok_akun[pId]).forEach(aId => {
+                countS++;
+                bS.innerHTML += `<tr><td>${DB.produk[pId]?.nama || pId}</td><td class="mono">${DB.stok_akun[pId][aId]}</td><td><button class="btn-del" onclick="hapusStok('${pId}','${aId}')">DEL</button></td></tr>`;
             });
         });
+        document.getElementById('badge-stok').innerText = countS;
 
-        tbody.innerHTML = html || `<tr><td colspan="5"><div class="empty">🗂️<br>Stok kosong</div></td></tr>`;
-        document.getElementById('badge-stok').innerText = totalAkun;
-        document.getElementById('stats-stok').innerHTML = `
-            <div class="stat-chip"><div class="val">${Object.keys(stok).length}</div><div class="lbl">Jenis Produk</div></div>
-            <div class="stat-chip"><div class="val">${totalAkun}</div><div class="lbl">Total Akun</div></div>`;
-    }
-
-    // ── RENDER TRANSAKSI ─────────────────────────────────────
-    function renderTransaksi() {
-        const tbody = document.getElementById('body-transaksi');
-        const data  = DB.transaksi;
-
-        if (!data || Object.keys(data).length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7"><div class="empty">💳<br>Belum ada transaksi</div></td></tr>`;
-            document.getElementById('badge-transaksi').innerText = 0;
-            document.getElementById('stats-transaksi').innerHTML = '';
-            return;
-        }
-
-        // Sort terbaru di atas
-        const keys = Object.keys(data).reverse();
-        let html = '';
-
-        keys.forEach(id => {
-            const t = data[id];
-            html += `<tr>
-                <td class="id-col">${id}</td>
-                <td><b>${esc(t.nama || '-')}</b></td>
-                <td class="muted">${esc(t.email || '-')}</td>
-                <td>${esc(t.produk || '-')}</td>
-                <td class="mono">${esc(t.data || '-')}</td>
-                <td class="muted" style="white-space:nowrap;">${esc(t.tanggal || '-')}</td>
-                <td><button class="btn-del" onclick="hapusTrx('${id}')">🗑 Hapus</button></td>
-            </tr>`;
+        // Render TRX
+        const bT = document.getElementById('body-transaksi'); bT.innerHTML = '';
+        Object.keys(DB.transaksi).reverse().forEach(id => {
+            const t = DB.transaksi[id];
+            bT.innerHTML += `<tr><td class="mono">${id}</td><td>${t.nama}</td><td>${t.produk}</td><td><button class="btn-del" onclick="hapusTrx('${id}')">DEL</button></td></tr>`;
         });
-
-        tbody.innerHTML = html;
-        const total = keys.length;
-        document.getElementById('badge-transaksi').innerText = total;
-        document.getElementById('stats-transaksi').innerHTML = `
-            <div class="stat-chip"><div class="val">${total}</div><div class="lbl">Total Transaksi</div></div>`;
+        document.getElementById('badge-transaksi').innerText = Object.keys(DB.transaksi).length;
     }
 
-    // ── RAW JSON ─────────────────────────────────────────────
-    let rawData = null;
-    function showRaw(key) {
-        const box = document.getElementById('rawBox');
-        const src = key === 'all' ? DB : DB[key];
-        rawData = src;
-        box.innerHTML = syntaxHighlight(JSON.stringify(src, null, 2));
-    }
-    function copyRaw() {
-        if (!rawData) return toast("Pilih data dulu!", true);
-        navigator.clipboard.writeText(JSON.stringify(rawData, null, 2))
-            .then(() => toast("JSON disalin ✓"))
-            .catch(() => toast("Gagal menyalin", true));
-    }
-    function syntaxHighlight(json) {
-        return json
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, m => {
-                let cls = 'json-num';
-                if (/^"/.test(m)) { cls = /:$/.test(m) ? 'json-key' : 'json-str'; }
-                else if (/true|false/.test(m)) cls = 'json-bool';
-                else if (/null/.test(m)) cls = 'json-null';
-                return `<span class="${cls}">${m}</span>`;
-            });
+    async function hapusStok(pId, aId) {
+        if(!confirm("Hapus stok?")) return;
+        await fetch(`${BASE_URL}stok_akun/${pId}/${aId}.json`, { method: 'DELETE' });
+        loadAll();
     }
 
-    // ── FILTER TABLE ─────────────────────────────────────────
-    function filterTable(tableId, query) {
-        const q    = query.toLowerCase();
-        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
-        rows.forEach(r => {
-            r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none';
-        });
-    }
-
-    // ── HAPUS STOK ───────────────────────────────────────────
-    async function hapusStok(prodId, akunId) {
-        if (!confirm(`Hapus akun "${akunId}" dari produk "${prodId}"?`)) return;
-        try {
-            const res = await fetch(`${BASE_URL}stok_akun/${prodId}/${akunId}.json`, { method: 'DELETE' });
-            if (!res.ok) throw new Error();
-            toast("Stok dihapus ✓");
-            await loadAll();
-        } catch (e) { toast("Gagal menghapus!", true); }
-    }
-
-    // ── HAPUS TRANSAKSI ──────────────────────────────────────
     async function hapusTrx(id) {
-        if (!confirm(`Hapus transaksi "${id}"?`)) return;
-        try {
-            const res = await fetch(`${BASE_URL}transaksi/${id}.json`, { method: 'DELETE' });
-            if (!res.ok) throw new Error();
-            toast("Transaksi dihapus ✓");
-            await loadAll();
-        } catch (e) { toast("Gagal menghapus!", true); }
+        if(!confirm("Hapus riwayat?")) return;
+        await fetch(`${BASE_URL}transaksi/${id}.json`, { method: 'DELETE' });
+        loadAll();
     }
 
-    // ── ESCAPE HTML ──────────────────────────────────────────
-    function esc(str) {
-        return String(str)
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    function showRaw() { document.getElementById('rawBox').innerText = JSON.stringify(DB, null, 2); }
+
+    function filterTable(id, q) {
+        const query = q.toLowerCase();
+        document.querySelectorAll(`#${id} tbody tr`).forEach(r => {
+            r.style.display = r.innerText.toLowerCase().includes(query) ? '' : 'none';
+        });
     }
 
-    // Init
+    function toast(m, e=false) {
+        const t = document.getElementById('toast');
+        t.innerText = m; t.className = "toast" + (e?" err":"") + " show";
+        setTimeout(()=> t.classList.remove('show'), 2000);
+    }
+
     loadAll();
 </script>
 </body>
