@@ -3,91 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database Viewer — Toko Tama</title>
+    <title>Database Viewer — Nidalop Store</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0b0d0f; color: #fff; min-height: 100vh; padding: 20px; max-width: 600px; margin: auto; overflow-x: hidden; }
+        
+        /* BACKGROUND DISAMAKAN DENGAN WEB SHOP */
+        body { 
+            background: #0b0d0f; 
+            background-image: radial-gradient(circle at top right, rgba(255, 0, 0, 0.1), transparent 300px);
+            background-attachment: fixed;
+            color: #ffffff; /* TEKS PUTIH ASLI */
+            min-height: 100vh; 
+            padding: 20px; 
+            max-width: 600px; 
+            margin: auto; 
+            overflow-x: hidden; 
+        }
 
         /* --- MENU HAMBURGER & NAV --- */
         .menu-wrapper { position: fixed; top: 20px; right: 20px; z-index: 10002; }
         #menuToggle { display: none; }
-        .hamburger { width: 45px; height: 45px; background: #161a1e; border: 1px solid #242a32; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
-        .hamburger span { display: block; width: 20px; height: 2px; background: #f5b041; border-radius: 2px; }
+        .hamburger { width: 45px; height: 45px; background: #1a0505; border: 1px solid #3d0a0a; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
+        .hamburger span { display: block; width: 20px; height: 2px; background: #ff0000; border-radius: 2px; }
         
-        .nav-menu { position: fixed; top: 75px; right: -250px; width: 200px; background: #161a1e; border: 1px solid #242a32; border-radius: 20px; padding: 15px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10003; }
+        .nav-menu { position: fixed; top: 75px; right: -250px; width: 200px; background: #1a0505; border: 1px solid #3d1414; border-radius: 20px; padding: 15px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10003; }
         #menuToggle:checked ~ .nav-menu { right: 20px; }
 
-        .nav-menu a { display: block; color: #8e959e; text-decoration: none; padding: 12px; font-size: 13px; font-weight: 800; border-radius: 12px; }
-        .nav-menu a:hover { background: #242a32; color: #f5b041; }
+        .nav-menu a { display: block; color: #ffffff; text-decoration: none; padding: 12px; font-size: 13px; font-weight: 800; border-radius: 12px; }
+        .nav-menu a:hover { background: #3d0a0a; color: #ff0000; }
 
         /* --- TOPBAR --- */
         .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; padding-right: 60px; }
-        .topbar h1 { font-size: 1.2rem; font-weight: 800; }
-        .topbar span { font-size: 10px; color: #8e959e; background: #161a1e; border: 1px solid #242a32; padding: 4px 10px; border-radius: 20px; }
+        .topbar h1 { font-size: 1.2rem; font-weight: 800; color: #ffffff; } /* PUTIH */
+        .topbar span { font-size: 10px; color: #ffffff; background: #1a0505; border: 1px solid #3d0a0a; padding: 4px 10px; border-radius: 20px; }
 
-        .btn-refresh { background: #f5b041; color: #000; border: none; padding: 10px 14px; border-radius: 12px; font-size: 14px; cursor: pointer; margin-left: auto; }
+        .btn-refresh { background: #ff0000; color: #fff; border: none; padding: 10px 14px; border-radius: 12px; font-size: 14px; cursor: pointer; margin-left: auto; font-weight: bold; }
 
-        /* --- FIX: TABS & BADGE (BIAR NGGAK KEPOTONG) --- */
+        /* --- TABS & BADGE --- */
         .tabs { 
             display: flex; 
             gap: 12px; 
             overflow-x: auto; 
-            padding: 10px 5px; /* Tambah padding biar badge punya ruang */
+            padding: 10px 5px; 
             margin-bottom: 20px; 
             scrollbar-width: none; 
         }
         .tabs::-webkit-scrollbar { display: none; }
 
         .tab { 
-            background: #161a1e; 
-            border: 1px solid #242a32; 
-            color: #8e959e; 
+            background: #1a0505; 
+            border: 1px solid #3d0a0a; 
+            color: #ffffff; /* PUTIH */
             padding: 10px 20px; 
             border-radius: 12px; 
             font-size: 12px; 
             font-weight: 700; 
             cursor: pointer; 
             white-space: nowrap; 
-            position: relative; /* Penting untuk posisi badge */
+            position: relative; 
             transition: 0.2s;
         }
-        .tab.active { background: #f5b041; color: #000; border-color: #f5b041; }
+        .tab.active { background: #ff0000; color: #fff; border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.3); }
 
         .tab .badge { 
             position: absolute; 
-            top: -8px; /* Geser lebih ke atas */
-            right: -5px; /* Geser lebih ke kanan */
-            background: #ef4444; 
-            color: #fff; 
+            top: -8px; 
+            right: -5px; 
+            background: #ffffff; 
+            color: #ff0000; 
             font-size: 10px; 
             min-width: 18px; 
             height: 18px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            border-radius: 50%; /* Biar bulat sempurna */
-            border: 2px solid #0b0d0f; /* Kasih outline biar kontras */
+            border-radius: 50%; 
+            border: 2px solid #0b0d0f; 
             font-weight: 900;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         }
-        .tab.active .badge { border-color: #f5b041; }
 
         /* --- CONTENT & TABLES --- */
         .section { display: none; animation: fadeIn 0.3s ease; }
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .search-bar { width: 100%; background: #161a1e; border: 2px solid #242a32; padding: 14px; color: #fff; border-radius: 15px; outline: none; font-size: 13px; margin-bottom: 20px; }
+        .search-bar { width: 100%; background: #1a0505; border: 2px solid #3d0a0a; padding: 14px; color: #fff; border-radius: 15px; outline: none; font-size: 13px; margin-bottom: 20px; }
+        .search-bar:focus { border-color: #ff0000; }
 
-        .table-wrap { overflow-x: auto; border-radius: 18px; border: 1px solid #242a32; background: #161a1e; }
+        .table-wrap { overflow-x: auto; border-radius: 18px; border: 1px solid #3d0a0a; background: #140404; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 450px; }
-        th { padding: 15px; text-align: left; background: #1a1f26; color: #8e959e; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 15px; border-top: 1px solid #242a32; vertical-align: middle; }
-        td.mono { font-family: monospace; color: #f5b041; }
+        th { padding: 15px; text-align: left; background: #1f0808; color: #ffffff; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 15px; border-top: 1px solid #3d0a0a; vertical-align: middle; color: #ffffff; } /* PUTIH */
+        td.mono { 
+    font-family: monospace; 
+    color: #10b981; /* Ganti kode ini jadi hijau */
+    font-weight: bold; 
+}
 
-        .btn-del { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
+        .btn-del { background: rgba(255,0,0,0.2); color: #fff; border: 1px solid rgba(255,0,0,0.2); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
+        .btn-del:hover { background: #ff0000; color: #fff; }
 
-        .toast { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); background: #10b981; color: #fff; padding: 12px 25px; border-radius: 15px; font-size: 13px; font-weight: 700; z-index: 20000; transition: 0.5s; }
+        .toast { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); background: green; color: #fff; padding: 12px 25px; border-radius: 15px; font-size: 13px; font-weight: 700; z-index: 20000; transition: 0.5s; }
         .toast.show { top: 30px; }
     </style>
 </head>
@@ -103,14 +119,14 @@
     <div class="nav-menu">
         <a href="index.html">⚙️ Owner Panel</a>
         <a href="keuntungan.html">💰 Keuntungan</a>
-        <hr style="border: 0; border-top: 1px solid #242a32; margin: 5px 0;">
+        <hr style="border: 0; border-top: 1px solid #3d0a0a; margin: 5px 0;">
         <a href="https://cemastore.vercel.app/" target="_blank">🏠 Ke Toko</a>
     </div>
 </div>
 
 <div class="topbar">
     <h1>🗄️ Database</h1>
-    <span>Toko Tama</span>
+    <span>Nidalop Store</span>
     <button class="btn-refresh" onclick="loadAll()">↻</button>
 </div>
 
@@ -143,14 +159,13 @@
 
 <div class="section" id="section-raw">
     <button onclick="showRaw()" class="btn-refresh" style="margin-bottom:10px; width:100%;">Tampilkan Semua Data JSON</button>
-    <pre id="rawBox" style="background:#0d1117; padding:15px; border-radius:15px; font-size:11px; overflow-x:auto; border:1px solid #242a32; color:#a5d6ff;"></pre>
+    <pre id="rawBox" style="background:#0d0202; padding:15px; border-radius:15px; font-size:11px; overflow-x:auto; border:1px solid #3d0a0a; color:#ffffff;"></pre>
 </div>
 
 <script>
     const BASE_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/";
     let DB = { produk: {}, stok_akun: {}, transaksi: {} };
 
-    // Proteksi Login
     if (localStorage.getItem('tama_admin_session') !== 'active') { window.location.href = "index.html"; }
 
     async function loadAll() {
@@ -164,7 +179,7 @@
             DB.stok_akun = await rS.json() || {};
             DB.transaksi = await rT.json() || {};
             renderAll();
-            toast("Data Updated! ✨");
+            toast("Data Updated! 🔥");
         } catch (e) { toast("Gagal memuat!", true); }
     }
 
@@ -176,28 +191,25 @@
     }
 
     function renderAll() {
-        // Render Produk
         const bP = document.getElementById('body-produk');
         bP.innerHTML = '';
         Object.keys(DB.produk).forEach(id => {
             const p = DB.produk[id];
             const s = DB.stok_akun[id] ? Object.keys(DB.stok_akun[id]).length : 0;
-            bP.innerHTML += `<tr><td class="mono">${id}</td><td><b>${p.nama}</b></td><td style="color:#f5b041;">${p.harga}</td><td>${s} Unit</td></tr>`;
+            bP.innerHTML += `<tr><td class="mono">${id}</td><td><b>${p.nama}</b></td><td style="color:#ffffff;">${p.harga}</td><td>${s} Unit</td></tr>`;
         });
         document.getElementById('badge-produk').innerText = Object.keys(DB.produk).length;
 
-        // Render Stok
         const bS = document.getElementById('body-stok'); bS.innerHTML = '';
         let countS = 0;
         Object.keys(DB.stok_akun).forEach(pId => {
             Object.keys(DB.stok_akun[pId]).forEach(aId => {
                 countS++;
-                bS.innerHTML += `<tr><td>${DB.produk[pId]?.nama || pId}</td><td class="mono">${DB.stok_akun[pId][aId]}</td><td><button class="btn-del" onclick="hapusStok('${pId}','${aId}')">DEL</button></td></tr>`;
+                bS.innerHTML += `<tr><td>${DB.produk[pId]?.nama || pId}</td><td style="color:#ffffff;">${DB.stok_akun[pId][aId]}</td><td><button class="btn-del" onclick="hapusStok('${pId}','${aId}')">DEL</button></td></tr>`;
             });
         });
         document.getElementById('badge-stok').innerText = countS;
 
-        // Render TRX
         const bT = document.getElementById('body-transaksi'); bT.innerHTML = '';
         Object.keys(DB.transaksi).reverse().forEach(id => {
             const t = DB.transaksi[id];
