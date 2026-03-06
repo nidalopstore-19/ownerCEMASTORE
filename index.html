@@ -4,6 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Akses Admin - NIDALOPSTORE</title>
+    
+    <script>
+        async function syncAdminTheme() {
+            const DB_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/owner_config.json";
+            try {
+                const res = await fetch(DB_URL);
+                const config = await res.json();
+                if (config) {
+                    const primary = config.colors.primary;
+                    const card = config.colors.card;
+                    const bg = config.bg;
+
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        :root { 
+                            --db-primary: ${primary} !important; 
+                            --db-card: ${card} !important; 
+                        }
+                        body { 
+                            background-image: url('${bg}') !important; 
+                            background-size: cover !important; 
+                            background-attachment: fixed !important; 
+                        }
+                        /* PAKSA WARNA ELEMEN UTAMA */
+                        .btn-login, .btn-add-new, #mainBtn, .hamburger span, .nav-menu a:hover, .admin-toast { 
+                            background: ${primary} !important; 
+                        }
+                        .login-card h2, #formTitle, .file-label, .btn-edit-small, .header h2, .nav-menu a:hover { 
+                            color: ${primary} !important; 
+                        }
+                        .hamburger, .nav-menu, .login-card, .product-item, .form-container, .confirm-card { 
+                            background: ${card} !important; 
+                            backdrop-filter: blur(15px) !important;
+                            border-color: rgba(255,255,255,0.1) !important;
+                        }
+                        .header div, .pp-preview, .prod-img-preview { border-color: ${primary} !important; }
+                        input:focus, textarea:focus { border-color: ${primary} !important; }
+                        div[style*="border-left: 3px solid"] { border-left-color: ${primary} !important; }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    // Update Foto Profil Admin di Header
+                    const adminPP = document.querySelector('.header img');
+                    if(adminPP && config.pp) adminPP.src = config.pp;
+                }
+            } catch (e) { console.log("Theme sync failed"); }
+        }
+        syncAdminTheme();
+    </script>
+
     <style>
         /* --- CSS ASLI (TETAP SAMA) --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -44,12 +94,10 @@
         .btn-back-modal { flex: 1; background: #242a32; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; cursor: pointer; }
         .btn-confirm-del { flex: 1; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 15px; font-weight: 800; cursor: pointer; }
 
-        /* --- CSS TAMBAHAN (MEWAH) --- */
         .prod-img-preview { width: 55px; height: 55px; border-radius: 15px; object-fit: cover; background: #0b0d0f; border: 1.5px solid #242a32; }
         .file-label { font-size: 10px; color: #ff0000; margin-bottom: 10px; display: block; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .terjual-badge { font-size: 9px; color: #8e959e; font-weight: 800; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 6px; margin-top: 4px; display: inline-block; }
 
-        /* UPGRADE TAMPILAN UPLOAD FOTO */
         #prodFoto {
             background: #0b0d0f;
             border: 2px dashed #3d1414;
@@ -103,6 +151,7 @@
         <div class="nav-menu">
             <a href="database.html">📊 Database Viewer</a>
             <a href="keuntungan.html">💰 Keuntungan</a>
+            <a href="admin_settings.html">🎨 Customizer</a>
             <a onclick="openSafetyModal()">🛡️ Keamanan</a>
             <hr style="border: 0; border-top: 1px solid #3d1414; margin: 5px 0;">
             <a href="#" onclick="localStorage.clear(); location.reload();">🚪 Logout</a>
@@ -186,7 +235,6 @@
             document.getElementById('loginSection').style.display = 'none';
         }
 
-        /* --- FUNGSI KEAMANAN (BARU) --- */
         function openSafetyModal() { document.getElementById('menuToggle').checked = false; document.getElementById('safetyModal').style.display = 'flex'; }
         function closeSafetyModal() { document.getElementById('safetyModal').style.display = 'none'; }
         async function saveSafety() {
