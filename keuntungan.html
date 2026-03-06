@@ -5,110 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan Keuangan - NIDALOPSTORE</title>
     <style>
+        :root { 
+            --p-color: #ff0000; 
+            --card-color: rgba(22, 26, 30, 0.8); 
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
-        /* BODY DIBUAT FLEX DAN TINGGI PENUH BIAR SCROLLING PAS */
         body { 
-            background-color: #0b0d0f; 
-            background-image: radial-gradient(circle at top right, rgba(255, 0, 0, 0.1), transparent 300px);
-            color: #ffffff; 
-            max-width: 500px; 
-            margin: auto; 
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* Matikan scroll utama body */
+            background-color: #0b0d0f; background-size: cover; background-position: center;
+            background-attachment: fixed; color: #ffffff; max-width: 500px; 
+            margin: auto; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- HEADER AREA (DIAM/FIXED) --- */
-        .header-fixed { padding: 20px; flex-shrink: 0; position: relative; z-index: 100; }
+        /* --- HEADER --- */
+        .header-fixed { padding: 25px 20px 10px; flex-shrink: 0; z-index: 100; }
 
-        .top-nav { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            margin-bottom: 25px; 
-            position: relative;
-            min-height: 45px;
-        }
+        .top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        
+        .owner-info { display: flex; align-items: center; gap: 12px; }
+        .owner-pp { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--p-color); padding: 2px; object-fit: cover; }
+        .owner-text h2 { font-size: 14px; font-weight: 900; letter-spacing: 1px; color: var(--p-color); }
+        .owner-text p { font-size: 9px; color: #8e959e; font-weight: 800; text-transform: uppercase; }
 
-        .title-center { text-align: center; }
-        .title-center h2 { font-size: 16px; color: #ff0000; letter-spacing: 1px; font-weight: 900; }
-        .title-center p { font-size: 9px; color: #8e959e; font-weight: 800; text-transform: uppercase; }
-
-        /* --- HAMBURGER MENU --- */
-        .menu-wrapper { position: absolute; right: 0; top: 0; }
+        /* --- HAMBURGER --- */
         #menuToggle { display: none; }
-        .hamburger { 
-            width: 42px; height: 42px; background: #161a1e; 
-            border: 1px solid #242a32; border-radius: 12px; 
-            display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; gap: 4px; cursor: pointer; 
-        }
-        .hamburger span { display: block; width: 18px; height: 2px; background: #ff0000; border-radius: 2px; transition: 0.3s; }
+        .hamburger { width: 42px; height: 42px; background: var(--card-color); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; backdrop-filter: blur(10px); }
+        .hamburger span { display: block; width: 18px; height: 2px; background: var(--p-color); border-radius: 2px; transition: 0.3s; }
         
         #menuToggle:checked ~ .hamburger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
         #menuToggle:checked ~ .hamburger span:nth-child(2) { opacity: 0; }
         #menuToggle:checked ~ .hamburger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-        .nav-menu { 
-            position: fixed; top: 75px; right: -250px; width: 220px; 
-            background: #161a1e; border: 1px solid #242a32; border-radius: 20px; 
-            padding: 15px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10003; 
-        }
+        .nav-menu { position: fixed; top: 80px; right: -250px; width: 220px; background: var(--card-color); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 15px; transition: 0.4s; backdrop-filter: blur(15px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1000; }
         #menuToggle:checked ~ .nav-menu { right: 20px; }
-        .nav-menu a { display: block; color: #a1a1aa; text-decoration: none; padding: 12px; font-size: 13px; font-weight: 800; border-radius: 12px; cursor: pointer; }
-        .nav-menu a:hover { background: #2d0a0a; color: #ff0000; }
+        .nav-menu a { display: block; color: #fff; text-decoration: none; padding: 12px; font-size: 12px; font-weight: 800; border-radius: 12px; }
+        .nav-menu a:hover { background: rgba(255,255,255,0.05); color: var(--p-color); }
 
-        /* --- STAT CARDS (DIAM/FIXED) --- */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
-        .stat-card { background: #161a1e; border: 1px solid #242a32; padding: 15px; border-radius: 20px; }
-        .stat-label { font-size: 10px; color: #8e959e; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
-        .stat-value { font-size: 18px; font-weight: 900; color: #ffffff; }
-        .stat-value span { color: #ff0000; font-size: 11px; margin-right: 3px; }
+        /* --- STATS CARDS --- */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .stat-card { background: var(--card-color); border: 1px solid rgba(255,255,255,0.05); padding: 15px; border-radius: 22px; backdrop-filter: blur(10px); }
+        .stat-label { font-size: 9px; color: #8e959e; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; }
+        .stat-value { font-size: 18px; font-weight: 900; }
+        .stat-value span { color: var(--p-color); font-size: 10px; margin-right: 2px; }
 
-        /* --- SCROLL AREA (KHUSUS RIWAYAT) --- */
-        .scroll-container { 
-            flex-grow: 1; 
-            overflow-y: auto; /* Aktifkan scroll hanya di sini */
-            padding: 0 20px 20px; 
-            scrollbar-width: none; /* Sembunyikan scrollbar Firefox */
-        }
-        .scroll-container::-webkit-scrollbar { display: none; } /* Sembunyikan scrollbar Chrome/Safari */
+        /* Progress Bar */
+        .progress-container { height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-top: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--p-color); width: 0%; transition: 1s; box-shadow: 0 0 10px var(--p-color); }
 
-        .list-title { 
-            font-size: 13px; 
-            font-weight: 800; 
-            margin-bottom: 15px; 
-            border-left: 3px solid #ff0000; 
-            padding-left: 10px; 
-            position: sticky; 
-            top: 0; 
-            background: #0b0d0f; 
-            padding-top: 10px; 
-            padding-bottom: 5px;
-            z-index: 10; 
-        }
-        .trx-item { background: rgba(22, 26, 30, 0.5); border: 1px solid #242a32; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .trx-info h4 { font-size: 14px; color: #ffffff; margin-bottom: 2px; }
-        .trx-info p { font-size: 10px; color: #8e959e; }
-        .trx-amount { color: #10b981; font-weight: 800; font-size: 14px; }
+        /* --- SCROLL AREA --- */
+        .scroll-container { flex-grow: 1; overflow-y: auto; padding: 10px 20px 30px; scrollbar-width: none; }
+        .scroll-container::-webkit-scrollbar { display: none; }
+
+        .list-title { font-size: 12px; font-weight: 900; color: var(--p-color); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .trx-item { background: var(--card-color); border: 1px solid rgba(255,255,255,0.03); padding: 16px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); }
+        .trx-info h4 { font-size: 13px; color: #fff; margin-bottom: 4px; font-weight: 800; }
+        .trx-info p { font-size: 10px; color: #555; font-weight: 700; }
+        .trx-amount { color: #10b981; font-weight: 900; font-size: 14px; text-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
         
-        .btn-delete-all { color: #ef4444 !important; border: 1px dashed #ef4444; margin-top: 10px; text-align: center; font-weight: 900 !important; }
+        .delete-btn { color: #ff4d4d !important; text-align: center; border: 1px dashed rgba(255, 77, 77, 0.3) !important; margin-top: 10px; font-size: 10px !important; }
     </style>
 </head>
 <body>
 
 <script>
-    if (localStorage.getItem('tama_admin_session') !== 'active') { window.location.href = 'index.html'; }
+    async function syncTheme() {
+        const DB_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/owner_config.json";
+        try {
+            const res = await fetch(DB_URL);
+            const config = await res.json();
+            if (config) {
+                document.documentElement.style.setProperty('--p-color', config.colors.primary);
+                document.documentElement.style.setProperty('--card-color', config.colors.card);
+                if(config.bg) document.body.style.backgroundImage = `url(${config.bg})`;
+                const pp = document.getElementById('owner-pp');
+                if(pp) pp.src = config.pp;
+            }
+        } catch (e) { console.log("Theme Sync Error"); }
+    }
+    syncTheme();
 </script>
 
 <div class="header-fixed">
     <div class="top-nav">
-        <div class="title-center">
-            <h2>FINANCE</h2>
-            <p>REKAP PENDAPATAN</p>
+        <div class="owner-info">
+            <img src="https://i.ibb.co/5h9N3Y4/logo-nidalo.png" id="owner-pp" class="owner-pp">
+            <div class="owner-text">
+                <h2>FINANCE REPORT</h2>
+                <p>Nidalopstore Official</p>
+            </div>
         </div>
         <div class="menu-wrapper">
             <input type="checkbox" id="menuToggle">
@@ -116,29 +102,30 @@
             <div class="nav-menu">
                 <a href="index.html">⚙️ Owner Panel</a>
                 <a href="database.html">📊 Database Viewer</a>
-                <a href="keuntungan.html">💰 Keuntungan</a>
-                <hr style="border: 0; border-top: 1px solid #3d1414; margin: 5px 0;">
-                <a href="#" onclick="localStorage.clear(); location.reload();">🚪 Logout</a>
-                <a href="#" class="btn-delete-all" onclick="hapusSemuaTransaksi()">🗑️ Hapus Semua TRX</a>
+                <a href="admin_settings.html">🎨 Customizer</a>
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 5px 0;">
+                <a href="#" class="delete-btn" onclick="hapusSemuaTransaksi()">🗑️ RESET SEMUA DATA</a>
             </div>
         </div>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">Harian (50k)</div>
+            <div class="stat-label">Daily Profit (Target 50k)</div>
             <div class="stat-value" id="v-harian"><span>Rp</span>0</div>
+            <div class="progress-container"><div id="p-harian" class="progress-fill"></div></div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Mingguan (250k)</div>
+            <div class="stat-label">Weekly Profit (Target 250k)</div>
             <div class="stat-value" id="v-mingguan"><span>Rp</span>0</div>
+            <div class="progress-container"><div id="p-mingguan" class="progress-fill"></div></div>
         </div>
     </div>
 </div>
 
 <div class="scroll-container">
-    <h3 class="list-title">Riwayat Pendapatan</h3>
-    <div id="trxList"><div style="text-align:center; padding:50px; color:#8e959e;">Memuat data...</div></div>
+    <h3 class="list-title">Live Transaction History</h3>
+    <div id="trxList"><div style="text-align:center; padding:50px; color:#555; font-size:12px; font-weight:800;">FETCHING DATABASE...</div></div>
 </div>
 
 <script>
@@ -149,7 +136,11 @@
             const res = await fetch(`${BASE_URL}transaksi.json`);
             const data = await res.json();
             const listContainer = document.getElementById('trxList');
-            if (!data) { listContainer.innerHTML = '<div style="text-align:center; padding:50px;">Kosong.</div>'; return; }
+            
+            if (!data) { 
+                listContainer.innerHTML = '<div style="text-align:center; padding:50px; color:#555; font-weight:800;">BELUM ADA TRANSAKSI.</div>'; 
+                return; 
+            }
 
             let totalHarian = 0, totalMingguan = 0;
             const sekarang = new Date();
@@ -186,14 +177,24 @@
                     </div>`;
             });
 
+            // Update Angka
             document.getElementById('v-harian').innerHTML = `<span>Rp</span>${totalHarian.toLocaleString('id-ID')}`;
             document.getElementById('v-mingguan').innerHTML = `<span>Rp</span>${totalMingguan.toLocaleString('id-ID')}`;
+
+            // Update Progress Bar (Target 50k & 250k)
+            const pHarian = Math.min((totalHarian / 50000) * 100, 100);
+            const pMingguan = Math.min((totalMingguan / 250000) * 100, 100);
+            
+            setTimeout(() => {
+                document.getElementById('p-harian').style.width = pHarian + '%';
+                document.getElementById('p-mingguan').style.width = pMingguan + '%';
+            }, 500);
 
         } catch (e) { console.log(e); }
     }
 
     async function hapusSemuaTransaksi() {
-        if (confirm("Hapus semua riwayat transaksi?")) {
+        if (confirm("⚠️ PERINGATAN: Hapus semua riwayat keuangan? Tindakan ini tidak bisa dibatalkan!")) {
             await fetch(`${BASE_URL}transaksi.json`, { method: 'DELETE' });
             location.reload();
         }
