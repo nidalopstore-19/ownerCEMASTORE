@@ -3,216 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Database Viewer — Nidalop Store</title>
-    
-    <script>
-        async function syncTampilan() {
-            const DB_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/owner_config.json";
-            try {
-                const res = await fetch(DB_URL);
-                const config = await res.json();
-                if (config) {
-                    const primary = config.colors.primary;
-                    const card = config.colors.card;
-                    const bg = config.bg;
-
-                    const style = document.createElement('style');
-                    style.innerHTML = `
-                        body { 
-                            background-image: url('${bg}') !important; 
-                            background-size: cover !important; 
-                            background-attachment: fixed !important; 
-                        }
-                        /* PAKSA WARNA TOMBOL & ELEMEN UTAMA */
-                        .btn-refresh, .tab.active, .btn-del, .nav-menu a:hover { 
-                            background-color: ${primary} !important; 
-                            color: #ffffff !important;
-                            border: none !important;
-                        }
-                        .tab.active, .search-bar:focus { border-color: ${primary} !important; }
-                        td.mono, .tab .badge, .topbar h1 { color: ${primary} !important; }
-                        .hamburger span { background-color: ${primary} !important; }
-
-                        /* WARNA KARTU & PANEL GLASS */
-                        .nav-menu, .hamburger, .tab, .table-wrap, .search-bar, .topbar span, th { 
-                            background: ${card} !important; 
-                            backdrop-filter: blur(15px) !important;
-                            border: 1px solid rgba(255,255,255,0.1) !important;
-                            color: #ffffff !important;
-                        }
-                        .tab .badge { background: #ffffff !important; }
-                    `;
-                    document.head.appendChild(style);
-                }
-            } catch (e) { console.log("Gagal sinkron tema"); }
-        }
-        syncTampilan();
-    </script>
-
+    <title>Owner Settings Ultra Luxury - NIDALOPSTORE</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css"/>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0b0d0f; min-height: 100vh; padding: 20px; max-width: 600px; margin: auto; overflow-x: hidden; transition: 0.3s; }
+        :root { 
+            --p-color: #ff0000; 
+            --card-color: rgba(10, 11, 14, 0.7); 
+        }
 
-        /* --- MENU HAMBURGER ANIMASI X --- */
-        .menu-wrapper { position: fixed; top: 20px; right: 20px; z-index: 10002; }
-        #menuToggle { display: none; }
-        .hamburger { width: 45px; height: 45px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; transition: 0.3s; }
-        .hamburger span { display: block; width: 22px; height: 2px; border-radius: 2px; transition: 0.4s; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
         
-        /* Animasi jadi X */
-        #menuToggle:checked + .hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        #menuToggle:checked + .hamburger span:nth-child(2) { opacity: 0; }
-        #menuToggle:checked + .hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        body { 
+            background-color: #020203; 
+            background-size: cover; 
+            background-position: center;
+            background-attachment: fixed; 
+            color: #ffffff; 
+            max-width: 500px; 
+            margin: auto; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+            padding: 25px;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-        .nav-menu { position: fixed; top: 75px; right: -250px; width: 200px; border-radius: 20px; padding: 15px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10003; }
-        #menuToggle:checked ~ .nav-menu { right: 20px; }
-        .nav-menu a { display: block; color: #ffffff; text-decoration: none; padding: 12px; font-size: 13px; font-weight: 800; border-radius: 12px; }
+        /* Overlay Noise biar background lebih bertekstur mewah */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 1;
+        }
 
-        /* --- UI ELEMENTS --- */
-        .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; padding-right: 60px; }
-        .topbar h1 { font-size: 1.2rem; font-weight: 800; }
-        .topbar span { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
-        .btn-refresh { border: none; padding: 10px 14px; border-radius: 12px; font-size: 14px; cursor: pointer; margin-left: auto; font-weight: bold; }
+        .container-content { position: relative; z-index: 2; }
 
-        .tabs { display: flex; gap: 12px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; scrollbar-width: none; }
-        .tab { padding: 10px 20px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; position: relative; }
-        .tab.active { box-shadow: 0 0 15px rgba(0,0,0,0.3); }
-        .tab .badge { position: absolute; top: -8px; right: -5px; background: #ffffff; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 900; }
+        /* --- HEADER --- */
+        .header { text-align: center; margin-bottom: 40px; padding-top: 20px; }
+        .header h2 { 
+            color: var(--p-color); 
+            font-size: 26px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 6px;
+            filter: drop-shadow(0 0 10px var(--p-color));
+        }
 
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- CARDS --- */
+        .setting-card { 
+            background: var(--card-color); 
+            border: 1px solid rgba(255,255,255,0.1); 
+            padding: 30px; 
+            border-radius: 35px; 
+            margin-bottom: 25px;
+            backdrop-filter: blur(25px) saturate(180%);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
 
-        .search-bar { width: 100%; padding: 14px; color: #fff; border-radius: 15px; outline: none; font-size: 13px; margin-bottom: 20px; }
-        .table-wrap { overflow-x: auto; border-radius: 18px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 450px; }
-        th { padding: 15px; text-align: left; text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
-        td.mono { font-family: monospace; font-weight: bold; }
-        .btn-del { padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
+        /* Efek cahaya lewat di kartu */
+        .setting-card::after {
+            content: "";
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+            transform: rotate(45deg);
+            animation: shine 6s infinite;
+        }
 
-        .toast { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); background: #10b981; color: #fff; padding: 12px 25px; border-radius: 15px; font-size: 13px; font-weight: 700; z-index: 20000; transition: 0.5s; }
-        .toast.show { top: 30px; }
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        /* --- PROFILE --- */
+        .pp-preview { 
+            width: 130px; height: 130px; 
+            border-radius: 50%; 
+            border: 2px solid rgba(255,255,255,0.2);
+            padding: 5px; 
+            object-fit: cover; 
+            margin-bottom: 25px; 
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(var(--p-color), 0.2); border-color: rgba(255,255,255,0.1); }
+            50% { box-shadow: 0 0 40px var(--p-color); border-color: var(--p-color); }
+        }
+
+        .upload-btn { 
+            background: rgba(255,255,255,0.05); 
+            color: #fff; padding: 14px 25px; 
+            border-radius: 18px; font-size: 10px; 
+            font-weight: 800; cursor: pointer; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- CONTROLS --- */
+        .control-item { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+        .control-item label { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.6); letter-spacing: 0.5px; }
+
+        .pickr .pcr-button { 
+            width: 50px !important; height: 50px !important; 
+            border-radius: 18px !important; 
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        /* --- SYNC BUTTON --- */
+        .btn-main { 
+            background: linear-gradient(135deg, var(--p-color) 0%, #4a0000 100%); 
+            color: #fff; width: 100%; padding: 22px; 
+            border: none; border-radius: 25px; 
+            font-weight: 900; cursor: pointer; 
+            letter-spacing: 3px; font-size: 14px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .btn-main::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(255,255,255,0.1), transparent);
+        }
     </style>
 </head>
 <body>
 
-<div id="toast" class="toast">OK</div>
-
-<div class="menu-wrapper">
-    <input type="checkbox" id="menuToggle">
-    <label for="menuToggle" class="hamburger">
-        <span></span><span></span><span></span>
-    </label>
-    <div class="nav-menu">
-        <a href="index.html">⚙️ Owner Panel</a>
-        <a href="keuntungan.html">💰 Keuntungan</a>
-        <a href="admin_settings.html">🎨 Customizer</a>
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 5px 0;">
-        <a href="https://cemastore.vercel.app/" target="_blank">🏠 Ke Toko</a>
+<div class="container-content">
+    <div class="header">
+        <h2>INTERFACE</h2>
+        <p>PREMIUM CONFIGURATION</p>
     </div>
-</div>
 
-<div class="topbar">
-    <h1>🗄️ Database</h1>
-    <span>Nidalop Store</span>
-    <button class="btn-refresh" onclick="loadAll()">↻</button>
-</div>
-
-<div class="tabs">
-    <div class="tab active" onclick="switchTab('produk')" id="tab-produk">📦 Produk <span class="badge" id="badge-produk">0</span></div>
-    <div class="tab" onclick="switchTab('stok')" id="tab-stok">🗂️ Stok <span class="badge" id="badge-stok">0</span></div>
-    <div class="tab" onclick="switchTab('transaksi')" id="tab-transaksi">💳 TRX <span class="badge" id="badge-transaksi">0</span></div>
-    <div class="tab" onclick="switchTab('raw')" id="tab-raw">{ } Raw</div>
-</div>
-
-<div class="section active" id="section-produk">
-    <input class="search-bar" placeholder="🔍 Cari produk..." oninput="filterTable('tbl-produk', this.value)">
-    <div class="table-wrap">
-        <table id="tbl-produk">
-            <thead><tr><th>ID</th><th>Nama</th><th>Harga</th><th>Stok</th></tr></thead>
-            <tbody id="body-produk"></tbody>
-        </table>
+    <div class="setting-card">
+        <span style="font-size: 10px; color: #555; font-weight: 900; letter-spacing: 2px; display: block; margin-bottom: 20px;">01. VISUAL IDENTITY</span>
+        <div style="text-align: center;">
+            <img src="https://i.ibb.co/5h9N3Y4/logo-nidalo.png" id="img-pp" class="pp-preview">
+            <div style="display: flex; justify-content: center; gap: 15px;">
+                <label for="input-pp" class="upload-btn">AVATAR</label>
+                <input type="file" id="input-pp" hidden accept="image/*" onchange="previewPP(this)">
+                <label for="input-bg" class="upload-btn">WALLPAPER</label>
+                <input type="file" id="input-bg" hidden accept="image/*" onchange="previewBG(this)">
+            </div>
+        </div>
     </div>
+
+    <div class="setting-card">
+        <span style="font-size: 10px; color: #555; font-weight: 900; letter-spacing: 2px; display: block; margin-bottom: 20px;">02. ATMOSPHERE</span>
+        <div class="control-item"><label>Primary Accent</label><div id="picker-p"></div></div>
+        <div class="control-item"><label>Glass Surface</label><div id="picker-card"></div></div>
+    </div>
+
+    <button class="btn-main" onclick="saveSettings()">SYNC TO FIREBASE</button>
 </div>
 
-<div class="section" id="section-stok">
-    <input class="search-bar" placeholder="🔍 Cari akun..." oninput="filterTable('tbl-stok', this.value)">
-    <div class="table-wrap"><table id="tbl-stok"><thead><tr><th>Produk</th><th>Data</th><th>Aksi</th></tr></thead><tbody id="body-stok"></tbody></table></div>
-</div>
-
-<div class="section" id="section-transaksi">
-    <input class="search-bar" placeholder="🔍 Cari TRX..." oninput="filterTable('tbl-transaksi', this.value)">
-    <div class="table-wrap"><table id="tbl-transaksi"><thead><tr><th>ID</th><th>Pembeli</th><th>Produk</th><th>Aksi</th></tr></thead><tbody id="body-transaksi"></tbody></table></div>
-</div>
-
-<div class="section" id="section-raw">
-    <button onclick="showRaw()" class="btn-refresh" style="margin-bottom:10px; width:100%;">Tampilkan Semua Data JSON</button>
-    <pre id="rawBox" style="background:rgba(0,0,0,0.5); padding:15px; border-radius:15px; font-size:11px; overflow-x:auto; border:1px solid rgba(255,255,255,0.1); color:#ffffff;"></pre>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
 <script>
-    const BASE_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/";
-    let DB = { produk: {}, stok_akun: {}, transaksi: {} };
+    const DB_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/.json";
+    let config = { pp: '', bg: '', colors: { primary: '#ff0000', card: 'rgba(10, 11, 14, 0.7)' } };
 
-    if (localStorage.getItem('tama_admin_session') !== 'active') { window.location.href = "index.html"; }
-
-    async function loadAll() {
+    async function init() {
         try {
-            const [rP, rS, rT] = await Promise.all([
-                fetch(`${BASE_URL}produk.json`),
-                fetch(`${BASE_URL}stok_akun.json`),
-                fetch(`${BASE_URL}transaksi.json`)
-            ]);
-            DB.produk = await rP.json() || {};
-            DB.stok_akun = await rS.json() || {};
-            DB.transaksi = await rT.json() || {};
-            renderAll();
-            toast("Data Updated! 🔥");
-        } catch (e) { toast("Gagal memuat!", true); }
+            const res = await fetch(DB_URL);
+            const data = await res.json();
+            if (data && data.owner_config) {
+                config = data.owner_config;
+                document.getElementById('img-pp').src = config.pp;
+                if(config.bg) document.body.style.backgroundImage = `url(${config.bg})`;
+                updateUI();
+            }
+        } catch (e) { console.error(e); }
+        setupPickers();
     }
 
-    function switchTab(name) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('tab-' + name).classList.add('active');
-        document.getElementById('section-' + name).classList.add('active');
+    function setupPickers() {
+        createPicker('#picker-p', config.colors.primary, 'primary');
+        createPicker('#picker-card', config.colors.card, 'card');
     }
 
-    function renderAll() {
-        const bP = document.getElementById('body-produk'); bP.innerHTML = '';
-        Object.keys(DB.produk).forEach(id => {
-            const p = DB.produk[id];
-            const s = DB.stok_akun[id] ? Object.keys(DB.stok_akun[id]).length : 0;
-            bP.innerHTML += `<tr><td class="mono">${id}</td><td><b>${p.nama}</b></td><td>${p.harga}</td><td>${s} Unit</td></tr>`;
+    function createPicker(el, color, key) {
+        const p = Pickr.create({
+            el: el, theme: 'nano', default: color,
+            components: { preview: true, opacity: true, hue: true, interaction: { hex: true, input: true, save: true } }
         });
-        document.getElementById('badge-produk').innerText = Object.keys(DB.produk).length;
-
-        const bS = document.getElementById('body-stok'); bS.innerHTML = '';
-        let countS = 0;
-        Object.keys(DB.stok_akun).forEach(pId => {
-            Object.keys(DB.stok_akun[pId]).forEach(aId => {
-                countS++;
-                bS.innerHTML += `<tr><td>${DB.produk[pId]?.nama || pId}</td><td>${DB.stok_akun[pId][aId]}</td><td><button class="btn-del" onclick="hapusStok('${pId}','${aId}')">DEL</button></td></tr>`;
-            });
+        p.on('change', (c) => { 
+            const val = c.toRGBA().toString(0);
+            config.colors[key] = val; 
+            updateUI(); 
         });
-        document.getElementById('badge-stok').innerText = countS;
-
-        const bT = document.getElementById('body-transaksi'); bT.innerHTML = '';
-        Object.keys(DB.transaksi).reverse().forEach(id => {
-            const t = DB.transaksi[id];
-            bT.innerHTML += `<tr><td class="mono">${id}</td><td>${t.nama}</td><td>${t.produk}</td><td><button class="btn-del" onclick="hapusTrx('${id}')">DEL</button></td></tr>`;
-        });
-        document.getElementById('badge-transaksi').innerText = Object.keys(DB.transaksi).length;
+        p.on('save', () => p.hide());
     }
 
-    async function hapusStok(pId, aId) { if(!confirm("Hapus stok?")) return; await fetch(`${BASE_URL}stok_akun/${pId}/${aId}.json`, { method: 'DELETE' }); loadAll(); }
-    async function hapusTrx(id) { if(!confirm("Hapus riwayat?")) return; await fetch(`${BASE_URL}transaksi/${id}.json`, { method: 'DELETE' }); loadAll(); }
-    function showRaw() { document.getElementById('rawBox').innerText = JSON.stringify(DB, null, 2); }
-    function filterTable(id, q) { const query = q.toLowerCase(); document.querySelectorAll(`#${id} tbody tr`).forEach(r => { r.style.display = r.innerText.toLowerCase().includes(query) ? '' : 'none'; }); }
-    function toast(m) { const t = document.getElementById('toast'); t.innerText = m; t.className = "toast show"; setTimeout(()=> t.classList.remove('show'), 2000); }
+    function updateUI() {
+        document.documentElement.style.setProperty('--p-color', config.colors.primary);
+        document.documentElement.style.setProperty('--card-color', config.colors.card);
+    }
 
-    loadAll();
+    function previewPP(i) {
+        const r = new FileReader();
+        r.onload = (e) => { document.getElementById('img-pp').src = e.target.result; config.pp = e.target.result; };
+        r.readAsDataURL(i.files[0]);
+    }
+
+    function previewBG(i) {
+        const r = new FileReader();
+        r.onload = (e) => { document.body.style.backgroundImage = `url(${e.target.result})`; config.bg = e.target.result; };
+        r.readAsDataURL(i.files[0]);
+    }
+
+    async function saveSettings() {
+        const btn = document.querySelector('.btn-main');
+        btn.innerText = "UPLOADING..."; btn.disabled = true;
+        try {
+            await fetch(DB_URL, { method: 'PATCH', body: JSON.stringify({ owner_config: config }) });
+            alert("✅ Interface Synced Successfully!");
+        } catch (e) { alert("❌ Error!"); }
+        btn.innerText = "SYNC TO FIREBASE"; btn.disabled = false;
+    }
+
+    init();
 </script>
 </body>
 </html>
