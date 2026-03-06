@@ -4,106 +4,94 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Database Viewer — Nidalop Store</title>
+    
+    <script>
+        async function syncTampilan() {
+            const DB_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/owner_config.json";
+            try {
+                const res = await fetch(DB_URL);
+                const config = await res.json();
+                if (config) {
+                    const primary = config.colors.primary;
+                    const card = config.colors.card;
+                    const bg = config.bg;
+
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        body { 
+                            background-image: url('${bg}') !important; 
+                            background-size: cover !important; 
+                            background-attachment: fixed !important; 
+                        }
+                        /* PAKSA WARNA TOMBOL & ELEMEN UTAMA */
+                        .btn-refresh, .tab.active, .btn-del, .nav-menu a:hover { 
+                            background-color: ${primary} !important; 
+                            color: #ffffff !important;
+                            border: none !important;
+                        }
+                        .tab.active, .search-bar:focus { border-color: ${primary} !important; }
+                        td.mono, .tab .badge, .topbar h1 { color: ${primary} !important; }
+                        .hamburger span { background-color: ${primary} !important; }
+
+                        /* WARNA KARTU & PANEL GLASS */
+                        .nav-menu, .hamburger, .tab, .table-wrap, .search-bar, .topbar span, th { 
+                            background: ${card} !important; 
+                            backdrop-filter: blur(15px) !important;
+                            border: 1px solid rgba(255,255,255,0.1) !important;
+                            color: #ffffff !important;
+                        }
+                        .tab .badge { background: #ffffff !important; }
+                    `;
+                    document.head.appendChild(style);
+                }
+            } catch (e) { console.log("Gagal sinkron tema"); }
+        }
+        syncTampilan();
+    </script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        
-        /* BACKGROUND DISAMAKAN DENGAN WEB SHOP */
-        body { 
-            background: #0b0d0f; 
-            background-image: radial-gradient(circle at top right, rgba(255, 0, 0, 0.1), transparent 300px);
-            background-attachment: fixed;
-            color: #ffffff; /* TEKS PUTIH ASLI */
-            min-height: 100vh; 
-            padding: 20px; 
-            max-width: 600px; 
-            margin: auto; 
-            overflow-x: hidden; 
-        }
+        body { background: #0b0d0f; min-height: 100vh; padding: 20px; max-width: 600px; margin: auto; overflow-x: hidden; transition: 0.3s; }
 
-        /* --- MENU HAMBURGER & NAV --- */
+        /* --- MENU HAMBURGER ANIMASI X --- */
         .menu-wrapper { position: fixed; top: 20px; right: 20px; z-index: 10002; }
         #menuToggle { display: none; }
-        .hamburger { width: 45px; height: 45px; background: #1a0505; border: 1px solid #3d0a0a; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; }
-        .hamburger span { display: block; width: 20px; height: 2px; background: #ff0000; border-radius: 2px; }
+        .hamburger { width: 45px; height: 45px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; transition: 0.3s; }
+        .hamburger span { display: block; width: 22px; height: 2px; border-radius: 2px; transition: 0.4s; }
         
-        .nav-menu { position: fixed; top: 75px; right: -250px; width: 200px; background: #1a0505; border: 1px solid #3d1414; border-radius: 20px; padding: 15px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10003; }
+        /* Animasi jadi X */
+        #menuToggle:checked + .hamburger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        #menuToggle:checked + .hamburger span:nth-child(2) { opacity: 0; }
+        #menuToggle:checked + .hamburger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .nav-menu { position: fixed; top: 75px; right: -250px; width: 200px; border-radius: 20px; padding: 15px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10003; }
         #menuToggle:checked ~ .nav-menu { right: 20px; }
-
         .nav-menu a { display: block; color: #ffffff; text-decoration: none; padding: 12px; font-size: 13px; font-weight: 800; border-radius: 12px; }
-        .nav-menu a:hover { background: #3d0a0a; color: #ff0000; }
 
-        /* --- TOPBAR --- */
+        /* --- UI ELEMENTS --- */
         .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; padding-right: 60px; }
-        .topbar h1 { font-size: 1.2rem; font-weight: 800; color: #ffffff; } /* PUTIH */
-        .topbar span { font-size: 10px; color: #ffffff; background: #1a0505; border: 1px solid #3d0a0a; padding: 4px 10px; border-radius: 20px; }
+        .topbar h1 { font-size: 1.2rem; font-weight: 800; }
+        .topbar span { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+        .btn-refresh { border: none; padding: 10px 14px; border-radius: 12px; font-size: 14px; cursor: pointer; margin-left: auto; font-weight: bold; }
 
-        .btn-refresh { background: #ff0000; color: #fff; border: none; padding: 10px 14px; border-radius: 12px; font-size: 14px; cursor: pointer; margin-left: auto; font-weight: bold; }
+        .tabs { display: flex; gap: 12px; overflow-x: auto; padding: 10px 5px; margin-bottom: 20px; scrollbar-width: none; }
+        .tab { padding: 10px 20px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; position: relative; }
+        .tab.active { box-shadow: 0 0 15px rgba(0,0,0,0.3); }
+        .tab .badge { position: absolute; top: -8px; right: -5px; background: #ffffff; font-size: 10px; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 900; }
 
-        /* --- TABS & BADGE --- */
-        .tabs { 
-            display: flex; 
-            gap: 12px; 
-            overflow-x: auto; 
-            padding: 10px 5px; 
-            margin-bottom: 20px; 
-            scrollbar-width: none; 
-        }
-        .tabs::-webkit-scrollbar { display: none; }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .tab { 
-            background: #1a0505; 
-            border: 1px solid #3d0a0a; 
-            color: #ffffff; /* PUTIH */
-            padding: 10px 20px; 
-            border-radius: 12px; 
-            font-size: 12px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            white-space: nowrap; 
-            position: relative; 
-            transition: 0.2s;
-        }
-        .tab.active { background: #ff0000; color: #fff; border-color: #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.3); }
-
-        .tab .badge { 
-            position: absolute; 
-            top: -8px; 
-            right: -5px; 
-            background: #ffffff; 
-            color: #ff0000; 
-            font-size: 10px; 
-            min-width: 18px; 
-            height: 18px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            border-radius: 50%; 
-            border: 2px solid #0b0d0f; 
-            font-weight: 900;
-        }
-
-        /* --- CONTENT & TABLES --- */
-        .section { display: none; animation: fadeIn 0.3s ease; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        .search-bar { width: 100%; background: #1a0505; border: 2px solid #3d0a0a; padding: 14px; color: #fff; border-radius: 15px; outline: none; font-size: 13px; margin-bottom: 20px; }
-        .search-bar:focus { border-color: #ff0000; }
-
-        .table-wrap { overflow-x: auto; border-radius: 18px; border: 1px solid #3d0a0a; background: #140404; }
+        .search-bar { width: 100%; padding: 14px; color: #fff; border-radius: 15px; outline: none; font-size: 13px; margin-bottom: 20px; }
+        .table-wrap { overflow-x: auto; border-radius: 18px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 450px; }
-        th { padding: 15px; text-align: left; background: #1f0808; color: #ffffff; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 15px; border-top: 1px solid #3d0a0a; vertical-align: middle; color: #ffffff; } /* PUTIH */
-        td.mono { 
-    font-family: monospace; 
-    color: #10b981; /* Ganti kode ini jadi hijau */
-    font-weight: bold; 
-}
+        th { padding: 15px; text-align: left; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+        td.mono { font-family: monospace; font-weight: bold; }
+        .btn-del { padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
 
-        .btn-del { background: rgba(255,0,0,0.2); color: #fff; border: 1px solid rgba(255,0,0,0.2); padding: 6px 12px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
-        .btn-del:hover { background: #ff0000; color: #fff; }
-
-        .toast { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); background: green; color: #fff; padding: 12px 25px; border-radius: 15px; font-size: 13px; font-weight: 700; z-index: 20000; transition: 0.5s; }
+        .toast { position: fixed; top: -80px; left: 50%; transform: translateX(-50%); background: #10b981; color: #fff; padding: 12px 25px; border-radius: 15px; font-size: 13px; font-weight: 700; z-index: 20000; transition: 0.5s; }
         .toast.show { top: 30px; }
     </style>
 </head>
@@ -119,7 +107,8 @@
     <div class="nav-menu">
         <a href="index.html">⚙️ Owner Panel</a>
         <a href="keuntungan.html">💰 Keuntungan</a>
-        <hr style="border: 0; border-top: 1px solid #3d0a0a; margin: 5px 0;">
+        <a href="admin_settings.html">🎨 Customizer</a>
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 5px 0;">
         <a href="https://cemastore.vercel.app/" target="_blank">🏠 Ke Toko</a>
     </div>
 </div>
@@ -159,7 +148,7 @@
 
 <div class="section" id="section-raw">
     <button onclick="showRaw()" class="btn-refresh" style="margin-bottom:10px; width:100%;">Tampilkan Semua Data JSON</button>
-    <pre id="rawBox" style="background:#0d0202; padding:15px; border-radius:15px; font-size:11px; overflow-x:auto; border:1px solid #3d0a0a; color:#ffffff;"></pre>
+    <pre id="rawBox" style="background:rgba(0,0,0,0.5); padding:15px; border-radius:15px; font-size:11px; overflow-x:auto; border:1px solid rgba(255,255,255,0.1); color:#ffffff;"></pre>
 </div>
 
 <script>
@@ -191,12 +180,11 @@
     }
 
     function renderAll() {
-        const bP = document.getElementById('body-produk');
-        bP.innerHTML = '';
+        const bP = document.getElementById('body-produk'); bP.innerHTML = '';
         Object.keys(DB.produk).forEach(id => {
             const p = DB.produk[id];
             const s = DB.stok_akun[id] ? Object.keys(DB.stok_akun[id]).length : 0;
-            bP.innerHTML += `<tr><td class="mono">${id}</td><td><b>${p.nama}</b></td><td style="color:#ffffff;">${p.harga}</td><td>${s} Unit</td></tr>`;
+            bP.innerHTML += `<tr><td class="mono">${id}</td><td><b>${p.nama}</b></td><td>${p.harga}</td><td>${s} Unit</td></tr>`;
         });
         document.getElementById('badge-produk').innerText = Object.keys(DB.produk).length;
 
@@ -205,7 +193,7 @@
         Object.keys(DB.stok_akun).forEach(pId => {
             Object.keys(DB.stok_akun[pId]).forEach(aId => {
                 countS++;
-                bS.innerHTML += `<tr><td>${DB.produk[pId]?.nama || pId}</td><td style="color:#ffffff;">${DB.stok_akun[pId][aId]}</td><td><button class="btn-del" onclick="hapusStok('${pId}','${aId}')">DEL</button></td></tr>`;
+                bS.innerHTML += `<tr><td>${DB.produk[pId]?.nama || pId}</td><td>${DB.stok_akun[pId][aId]}</td><td><button class="btn-del" onclick="hapusStok('${pId}','${aId}')">DEL</button></td></tr>`;
             });
         });
         document.getElementById('badge-stok').innerText = countS;
@@ -218,32 +206,11 @@
         document.getElementById('badge-transaksi').innerText = Object.keys(DB.transaksi).length;
     }
 
-    async function hapusStok(pId, aId) {
-        if(!confirm("Hapus stok?")) return;
-        await fetch(`${BASE_URL}stok_akun/${pId}/${aId}.json`, { method: 'DELETE' });
-        loadAll();
-    }
-
-    async function hapusTrx(id) {
-        if(!confirm("Hapus riwayat?")) return;
-        await fetch(`${BASE_URL}transaksi/${id}.json`, { method: 'DELETE' });
-        loadAll();
-    }
-
+    async function hapusStok(pId, aId) { if(!confirm("Hapus stok?")) return; await fetch(`${BASE_URL}stok_akun/${pId}/${aId}.json`, { method: 'DELETE' }); loadAll(); }
+    async function hapusTrx(id) { if(!confirm("Hapus riwayat?")) return; await fetch(`${BASE_URL}transaksi/${id}.json`, { method: 'DELETE' }); loadAll(); }
     function showRaw() { document.getElementById('rawBox').innerText = JSON.stringify(DB, null, 2); }
-
-    function filterTable(id, q) {
-        const query = q.toLowerCase();
-        document.querySelectorAll(`#${id} tbody tr`).forEach(r => {
-            r.style.display = r.innerText.toLowerCase().includes(query) ? '' : 'none';
-        });
-    }
-
-    function toast(m, e=false) {
-        const t = document.getElementById('toast');
-        t.innerText = m; t.className = "toast" + (e?" err":"") + " show";
-        setTimeout(()=> t.classList.remove('show'), 2000);
-    }
+    function filterTable(id, q) { const query = q.toLowerCase(); document.querySelectorAll(`#${id} tbody tr`).forEach(r => { r.style.display = r.innerText.toLowerCase().includes(query) ? '' : 'none'; }); }
+    function toast(m) { const t = document.getElementById('toast'); t.innerText = m; t.className = "toast show"; setTimeout(()=> t.classList.remove('show'), 2000); }
 
     loadAll();
 </script>
