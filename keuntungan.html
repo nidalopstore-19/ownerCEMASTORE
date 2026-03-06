@@ -7,6 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
+        /* BODY DIBUAT FLEX DAN TINGGI PENUH BIAR SCROLLING PAS */
         body { 
             background-color: #0b0d0f; 
             background-image: radial-gradient(circle at top right, rgba(255, 0, 0, 0.1), transparent 300px);
@@ -16,11 +17,11 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; 
+            overflow: hidden; /* Matikan scroll utama body */
         }
 
-        /* --- HEADER AREA --- */
-        .header-fixed { padding: 20px; flex-shrink: 0; position: relative; }
+        /* --- HEADER AREA (DIAM/FIXED) --- */
+        .header-fixed { padding: 20px; flex-shrink: 0; position: relative; z-index: 100; }
 
         .top-nav { 
             display: flex; 
@@ -35,7 +36,7 @@
         .title-center h2 { font-size: 16px; color: #ff0000; letter-spacing: 1px; font-weight: 900; }
         .title-center p { font-size: 9px; color: #8e959e; font-weight: 800; text-transform: uppercase; }
 
-        /* --- HAMBURGER MENU ANIMASI (MENJADI X) --- */
+        /* --- HAMBURGER MENU --- */
         .menu-wrapper { position: absolute; right: 0; top: 0; }
         #menuToggle { display: none; }
         .hamburger { 
@@ -43,19 +44,15 @@
             border: 1px solid #242a32; border-radius: 12px; 
             display: flex; flex-direction: column; align-items: center; 
             justify-content: center; gap: 4px; cursor: pointer; 
-            transition: 0.3s;
         }
-        .hamburger span { 
-            display: block; width: 18px; height: 2px; background: #ff0000; 
-            border-radius: 2px; transition: 0.3s; 
-        }
+        .hamburger span { display: block; width: 18px; height: 2px; background: #ff0000; border-radius: 2px; transition: 0.3s; }
         
         #menuToggle:checked ~ .hamburger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
         #menuToggle:checked ~ .hamburger span:nth-child(2) { opacity: 0; }
         #menuToggle:checked ~ .hamburger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
         .nav-menu { 
-            position: fixed; top: 75px; right: -250px; width: 200px; 
+            position: fixed; top: 75px; right: -250px; width: 220px; 
             background: #161a1e; border: 1px solid #242a32; border-radius: 20px; 
             padding: 15px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10003; 
@@ -64,129 +61,142 @@
         .nav-menu a { display: block; color: #a1a1aa; text-decoration: none; padding: 12px; font-size: 13px; font-weight: 800; border-radius: 12px; cursor: pointer; }
         .nav-menu a:hover { background: #2d0a0a; color: #ff0000; }
 
-        /* --- STAT CARDS --- */
-        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 10px; }
+        /* --- STAT CARDS (DIAM/FIXED) --- */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 5px; }
         .stat-card { background: #161a1e; border: 1px solid #242a32; padding: 15px; border-radius: 20px; }
-        .stat-label-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; }
-        .stat-label { font-size: 10px; color: #8e959e; font-weight: 800; text-transform: uppercase; }
-        .stat-percent { font-size: 11px; font-weight: 900; color: #ff0000; }
-        .stat-value { font-size: 20px; font-weight: 900; color: #ffffff; margin-bottom: 8px; }
-        .stat-value span { color: #ff0000; font-size: 12px; margin-right: 4px; }
-        .progress-bg { background: #0b0d0f; height: 6px; border-radius: 10px; overflow: hidden; border: 1px solid #242a32; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #990000, #ff0000); width: 0%; transition: width 1s ease-in-out; }
+        .stat-label { font-size: 10px; color: #8e959e; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
+        .stat-value { font-size: 18px; font-weight: 900; color: #ffffff; }
+        .stat-value span { color: #ff0000; font-size: 11px; margin-right: 3px; }
 
-        /* --- SCROLL AREA --- */
-        .scroll-container { flex-grow: 1; overflow-y: auto; padding: 0 20px 20px; scrollbar-width: none; }
-        .scroll-container::-webkit-scrollbar { display: none; }
-        .list-title { font-size: 13px; font-weight: 800; margin-bottom: 15px; border-left: 3px solid #ff0000; padding-left: 10px; position: sticky; top: 0; background: #0b0d0f; padding-top: 10px; z-index: 10; }
+        /* --- SCROLL AREA (KHUSUS RIWAYAT) --- */
+        .scroll-container { 
+            flex-grow: 1; 
+            overflow-y: auto; /* Aktifkan scroll hanya di sini */
+            padding: 0 20px 20px; 
+            scrollbar-width: none; /* Sembunyikan scrollbar Firefox */
+        }
+        .scroll-container::-webkit-scrollbar { display: none; } /* Sembunyikan scrollbar Chrome/Safari */
+
+        .list-title { 
+            font-size: 13px; 
+            font-weight: 800; 
+            margin-bottom: 15px; 
+            border-left: 3px solid #ff0000; 
+            padding-left: 10px; 
+            position: sticky; 
+            top: 0; 
+            background: #0b0d0f; 
+            padding-top: 10px; 
+            padding-bottom: 5px;
+            z-index: 10; 
+        }
         .trx-item { background: rgba(22, 26, 30, 0.5); border: 1px solid #242a32; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .trx-info h4 { font-size: 14px; color: #ffffff; margin-bottom: 2px; }
         .trx-info p { font-size: 10px; color: #8e959e; }
         .trx-amount { color: #10b981; font-weight: 800; font-size: 14px; }
-        .loading { text-align: center; padding: 50px; color: #8e959e; font-size: 13px; }
+        
+        .btn-delete-all { color: #ef4444 !important; border: 1px dashed #ef4444; margin-top: 10px; text-align: center; font-weight: 900 !important; }
     </style>
 </head>
 <body>
+
+<script>
+    if (localStorage.getItem('tama_admin_session') !== 'active') { window.location.href = 'index.html'; }
+</script>
 
 <div class="header-fixed">
     <div class="top-nav">
         <div class="title-center">
             <h2>FINANCE</h2>
-            <p>TARGET MONITOR</p>
+            <p>REKAP PENDAPATAN</p>
         </div>
-
         <div class="menu-wrapper">
             <input type="checkbox" id="menuToggle">
-            <label for="menuToggle" class="hamburger">
-                <span></span><span></span><span></span>
-            </label>
+            <label for="menuToggle" class="hamburger"><span></span><span></span><span></span></label>
             <div class="nav-menu">
                 <a href="index.html">⚙️ Owner Panel</a>
                 <a href="database.html">📊 Database Viewer</a>
                 <a href="keuntungan.html">💰 Keuntungan</a>
                 <hr style="border: 0; border-top: 1px solid #3d1414; margin: 5px 0;">
                 <a href="#" onclick="localStorage.clear(); location.reload();">🚪 Logout</a>
-                <a href="https://cemastore.vercel.app/" target="_blank">🏠 Ke Toko</a>
+                <a href="#" class="btn-delete-all" onclick="hapusSemuaTransaksi()">🗑️ Hapus Semua TRX</a>
             </div>
         </div>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label-flex"><div class="stat-label">Harian (50k)</div><div class="stat-percent" id="p-harian">0%</div></div>
+            <div class="stat-label">Harian (50k)</div>
             <div class="stat-value" id="v-harian"><span>Rp</span>0</div>
-            <div class="progress-bg"><div class="progress-fill" id="b-harian"></div></div>
         </div>
         <div class="stat-card">
-            <div class="stat-label-flex"><div class="stat-label">Bulanan (500k)</div><div class="stat-percent" id="p-bulanan">0%</div></div>
-            <div class="stat-value" id="v-bulanan"><span>Rp</span>0</div>
-            <div class="progress-bg"><div class="progress-fill" id="b-bulanan"></div></div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label-flex"><div class="stat-label">Tahunan (1jt)</div><div class="stat-percent" id="p-tahunan">0%</div></div>
-            <div class="stat-value" id="v-tahunan"><span>Rp</span>0</div>
-            <div class="progress-bg"><div class="progress-fill" id="b-tahunan"></div></div>
+            <div class="stat-label">Mingguan (250k)</div>
+            <div class="stat-value" id="v-mingguan"><span>Rp</span>0</div>
         </div>
     </div>
 </div>
 
 <div class="scroll-container">
     <h3 class="list-title">Riwayat Pendapatan</h3>
-    <div id="trxList"><div class="loading">Memuat data...</div></div>
+    <div id="trxList"><div style="text-align:center; padding:50px; color:#8e959e;">Memuat data...</div></div>
 </div>
 
 <script>
     const BASE_URL = "https://toko-tama-default-rtdb.asia-southeast1.firebasedatabase.app/";
-    const TARGET = { harian: 50000, bulanan: 500000, tahunan: 1000000 };
 
     async function loadFinance() {
         try {
             const res = await fetch(`${BASE_URL}transaksi.json`);
             const data = await res.json();
-            if (!data) {
-                document.getElementById('trxList').innerHTML = '<div class="loading">Belum ada transaksi.</div>';
-                return;
-            }
-            let totalHarian = 0, totalBulanan = 0, totalTahunan = 0;
-            const hariIni = new Date().toLocaleDateString('id-ID');
-            const bulanIni = new Date().getMonth() + 1;
-            const tahunIni = new Date().getFullYear();
-
             const listContainer = document.getElementById('trxList');
+            if (!data) { listContainer.innerHTML = '<div style="text-align:center; padding:50px;">Kosong.</div>'; return; }
+
+            let totalHarian = 0, totalMingguan = 0;
+            const sekarang = new Date();
+            sekarang.setHours(0,0,0,0);
+            
+            const tujuhHariLalu = new Date();
+            tujuhHariLalu.setDate(sekarang.getDate() - 7);
+            tujuhHariLalu.setHours(0,0,0,0);
+
             listContainer.innerHTML = '';
+            const keys = Object.keys(data).reverse();
 
-            Object.keys(data).reverse().forEach(id => {
+            keys.forEach(id => {
                 const trx = data[id];
-                const harga = parseInt(trx.harga || 0);
-                const tglTrx = trx.tanggal.split(' ')[0];
-                const parts = tglTrx.split('/');
+                const harga = parseInt(trx.harga) || 0;
+                const tglFull = trx.tanggal || ""; 
+                const p = tglFull.match(/\d+/g); 
+                
+                if (p && p.length >= 3) {
+                    const tglTrx = new Date(parseInt(p[2]), parseInt(p[1]) - 1, parseInt(p[0]));
+                    tglTrx.setHours(0,0,0,0);
 
-                if (tglTrx === hariIni) totalHarian += harga;
-                if (parseInt(parts[1]) === bulanIni && parseInt(parts[2]) === tahunIni) totalBulanan += harga;
-                if (parseInt(parts[2]) === tahunIni) totalTahunan += harga;
+                    if (tglTrx.getTime() === sekarang.getTime()) totalHarian += harga;
+                    if (tglTrx >= tujuhHariLalu) totalMingguan += harga;
+                }
 
                 listContainer.innerHTML += `
                     <div class="trx-item">
                         <div class="trx-info">
                             <h4>${trx.produk}</h4>
-                            <p>${trx.tanggal} • ${trx.nama}</p>
+                            <p>${tglFull} • ${trx.nama}</p>
                         </div>
                         <div class="trx-amount">+${harga.toLocaleString('id-ID')}</div>
                     </div>`;
             });
 
-            updateProgress('harian', totalHarian, TARGET.harian);
-            updateProgress('bulanan', totalBulanan, TARGET.bulanan);
-            updateProgress('tahunan', totalTahunan, TARGET.tahunan);
-        } catch (e) { document.getElementById('trxList').innerHTML = '<div class="loading">Gagal memuat.</div>'; }
+            document.getElementById('v-harian').innerHTML = `<span>Rp</span>${totalHarian.toLocaleString('id-ID')}`;
+            document.getElementById('v-mingguan').innerHTML = `<span>Rp</span>${totalMingguan.toLocaleString('id-ID')}`;
+
+        } catch (e) { console.log(e); }
     }
 
-    function updateProgress(type, current, goal) {
-        let percent = Math.floor((current / goal) * 100);
-        if (percent > 100) percent = 100;
-        document.getElementById(`v-${type}`).innerHTML = `<span>Rp</span>${current.toLocaleString('id-ID')}`;
-        document.getElementById(`p-${type}`).innerText = `${percent}%`;
-        document.getElementById(`b-${type}`).style.width = `${percent}%`;
+    async function hapusSemuaTransaksi() {
+        if (confirm("Hapus semua riwayat transaksi?")) {
+            await fetch(`${BASE_URL}transaksi.json`, { method: 'DELETE' });
+            location.reload();
+        }
     }
 
     loadFinance();
