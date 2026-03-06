@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akses Admin - NIDALOPSTORE</title>
+    <title>Akses Admin — NAMASTORE</title>
     
     <script>
         async function syncAdminTheme() {
@@ -17,7 +17,14 @@
                     const bg = config.bg;
                     const storeName = config.storeName || "NAMASTORE";
 
-                    // Update Loader Visuals
+                    // GANTI SEMUA TEKS NIDALOPSTORE MENJADI NAMA STORE DATABASE
+                    document.title = `Akses Admin — ${storeName}`;
+                    const loginTitle = document.getElementById('login-title-text');
+                    if(loginTitle) loginTitle.innerText = `${storeName} LOGIN`;
+                    const headerTitle = document.getElementById('header-title-text');
+                    if(headerTitle) headerTitle.innerText = `${storeName} ADMIN`;
+
+                    // Transisi Loader Visuals
                     const ball = document.querySelector('.orbit-ball');
                     const text = document.getElementById('loaderTextDisplay');
                     if(ball) { 
@@ -66,7 +73,7 @@
     </script>
 
     <style>
-        /* --- PRELOADER (FIXED SMOOTH FADE OUT) --- */
+        /* --- PRELOADER (SMOOTH FADE OUT) --- */
         #preloader { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: #000000; display: flex; flex-direction: column; 
@@ -82,7 +89,7 @@
         .loader-text { margin-top: 35px; color: #555; font-size: 11px; font-weight: 900; letter-spacing: 5px; text-transform: uppercase; opacity: 0.8; text-align: center; transition: color 0.8s ease; }
         @keyframes orbit-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* --- CSS ASLI (TETAP SAMA) --- */
+        /* --- CSS ASLI --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: #0b0d0f; background-image: radial-gradient(circle at top right, rgba(255, 0, 0, 0.05), transparent 300px); color: white; padding: 20px; max-width: 500px; margin: auto; overflow-x: hidden; min-height: 100vh; }
         #loginSection { height: 100vh; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; background: #0b0d0f; z-index: 99999; }
@@ -142,7 +149,7 @@
 
 <div id="loginSection">
     <div class="login-card">
-        <h2>NIDALOPSTORE LOGIN</h2>
+        <h2 id="login-title-text">ADMIN LOGIN</h2>
         <div id="loginError" class="login-error">Kredensial Salah! ❌</div>
         <input type="text" id="authUser" placeholder="Username">
         <input type="password" id="authPass" placeholder="Password">
@@ -171,7 +178,7 @@
     <div style="width: 65px; height: 65px; border-radius: 50%; border: 2px solid #ff0000; background: #1a0505; margin: 0 auto 10px auto; overflow: hidden; box-shadow: 0 0 15px rgba(255,0,0,0.2);">
         <img src="https://raw.githubusercontent.com/bagus-api/storage/master/VpPBE.jpg" width="100%" height="100%" style="object-fit: cover;">
     </div>
-    <h2 style="font-size: 1.2rem; color: #ff0000; font-weight: 800;">NIDALOPSTORE ADMIN</h2>
+    <h2 id="header-title-text" style="font-size: 1.2rem; color: #ff0000; font-weight: 800;">ADMIN PANEL</h2>
 </div>
 
 <button class="btn-add-new" onclick="openForm()">+ TAMBAH PRODUK BARU</button>
@@ -238,17 +245,16 @@
             if (u === db.username && p === db.password && parseInt(pin) === db.pin) {
                 localStorage.setItem('tama_admin_session', 'active');
                 document.getElementById('loginSection').style.display = 'none';
-                loadList(true); // TRUE = FIRST LOAD (PAKAI LOADING)
+                loadList(false); // Ambil data saat login (False = Pakai Loading)
             } else { err.style.display = 'block'; }
         } catch (e) { alert("Gagal koneksi database!"); }
     }
 
-    // --- FIX: loadList dengan parameter isSilent ---
-    async function loadList(isSilent = false) {
+    async function loadList(isSilent = true) {
         if (localStorage.getItem('tama_admin_session') !== 'active') { hideLoader(); return; }
         
-        // Tampilkan loader hanya jika bukan silent update
-        if (!isSilent) document.getElementById('preloader').classList.remove('hide');
+        // Munculkan loader hanya jika buka pertama atau login
+        if(!isSilent) document.getElementById('preloader').classList.remove('hide');
         const safety = setTimeout(hideLoader, 4500);
 
         try {
@@ -258,15 +264,15 @@
             ]);
             const dataP = await resP.json(); const dataS = await resS.json() || {};
             const container = document.getElementById('adminProductList');
-            container.innerHTML = '';
             
+            let htmlContent = '';
             if(!dataP) { 
-                container.innerHTML = "<p style='text-align:center; opacity:0.3;'>Belum ada produk.</p>"; 
+                htmlContent = "<p style='text-align:center; opacity:0.3;'>Belum ada produk.</p>"; 
             } else {
                 Object.keys(dataP).forEach(id => {
                     const p = dataP[id]; const jml = dataS[id] ? Object.keys(dataS[id]).length : 0;
                     const imgTag = p.logo ? `<img src="${p.logo}" class="prod-img-preview">` : `<div class="prod-img-preview" style="display:flex;align-items:center;justify-content:center;font-size:9px;color:#444;text-align:center;padding:5px;">NO PP</div>`;
-                    container.innerHTML += `
+                    htmlContent += `
                         <div class="product-item">
                             ${imgTag}
                             <div class="prod-info">
@@ -281,9 +287,15 @@
                         </div>`;
                 });
             }
-            // DATA SIAP, BARU HILANGKAN LOADING
-            clearTimeout(safety);
-            setTimeout(hideLoader, 1000); 
+            
+            // Render HTML dulu
+            container.innerHTML = htmlContent;
+
+            // Jika ini load pertama, baru tutup loading
+            if(!isSilent) {
+                clearTimeout(safety);
+                setTimeout(hideLoader, 1000);
+            }
         } catch (e) { hideLoader(); }
     }
 
@@ -301,7 +313,7 @@
         if(fotoData) data.logo = fotoData;
         await fetch(`${BASE_URL}produk/${id}.json`, { method: 'PATCH', body: JSON.stringify(data) });
         showToast("Berhasil Terupdate! ✨"); closeForm(); 
-        loadList(true); // TRUE = SILENT UPDATE (TIDAK ADA LOADING SCREEN)
+        loadList(true); // Silent update
     }
 
     async function tambahStok() {
@@ -311,9 +323,10 @@
         const lines = dataRaw.split('\n');
         for(let line of lines) { if(line.trim()) await fetch(`${BASE_URL}stok_akun/${id}.json`, { method: 'POST', body: JSON.stringify(line.trim()) }); }
         showToast("Stok Masuk! 🚀"); document.getElementById('accData').value = ""; 
-        loadList(true); // TRUE = SILENT UPDATE (TIDAK ADA LOADING SCREEN)
+        loadList(true); // Silent update
     }
 
+    // Modal Helpers
     function openForm() { resetForm(); document.getElementById('formModal').style.display = 'flex'; }
     function closeForm() { document.getElementById('formModal').style.display = 'none'; }
     function closeConfirm() { document.getElementById('confirmModal').style.display = 'none'; targetDeleteId = null; }
@@ -328,9 +341,7 @@
     async function confirmDelete() {
         if(!targetDeleteId) return;
         await Promise.all([fetch(`${BASE_URL}produk/${targetDeleteId}.json`, { method: 'DELETE' }), fetch(`${BASE_URL}stok_akun/${targetDeleteId}.json`, { method: 'DELETE' })]);
-        closeConfirm(); 
-        loadList(true); // TRUE = SILENT UPDATE
-        showToast("Dihapus! 💀");
+        closeConfirm(); loadList(true); showToast("Dihapus! 💀");
     }
     document.getElementById('btnConfirmDelete').onclick = confirmDelete;
 
@@ -348,10 +359,8 @@
 
     if (localStorage.getItem('tama_admin_session') === 'active') { 
         document.getElementById('loginSection').style.display = 'none'; 
-        loadList(false); // FALSE = FIRST LOAD (TAMPILKAN LOADING)
-    } else { 
-        hideLoader(); 
-    }
+        loadList(false); // First load
+    } else { hideLoader(); }
 </script>
 </body>
 </html>
