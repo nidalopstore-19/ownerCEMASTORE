@@ -6,6 +6,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+let pairingCodeRequested = false;
+const ID_GRUP_STORE = "120363404036911585@g.us"; 
+
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
@@ -15,48 +18,43 @@ const client = new Client({
 });
 
 client.on('ready', () => {
-    console.log('✅ BOT NIDALOP SUDAH AKTIF DI GRUP!');
+    console.log('✅ NIDA-BOOT SUDAH AKTIF!');
 });
 
-// Fitur Pairing Code
-client.on('qr', async () => {
-    // Ganti nomor di bawah dengan nomor WA bot kamu (pakai format 628xxx)
-    const nomorWA = "628123456789"; 
-    
+// --- FITUR DYNAMIC PAIRING (Kaya Panel) ---
+app.get('/request-pairing', async (req, res) => {
+    const nomorWA = req.query.number; // Ambil nomor dari link: ?number=62xxx
+    if (!nomorWA) return res.send("Masukkan nomor tlp di link! Contoh: /request-pairing?number=628xxx");
+
     try {
         const code = await client.requestPairingCode(nomorWA);
-        console.log('------------------------------');
-        console.log('MASUKKAN KODE INI DI WA KAMU:');
-        console.log('👉 ' + code + ' 👈');
-        console.log('------------------------------');
+        res.send(`<h1>KODE PAIRING KAMU: ${code}</h1><p>Masukkan kode ini di WA kamu sekarang.</p>`);
+        console.log(`KODE PAIRING UNTUK ${nomorWA}: ${code}`);
     } catch (err) {
-        console.log('Gagal meminta Pairing Code', err);
+        res.status(500).send("Gagal minta kode. Pastikan bot belum login.");
     }
 });
 
-// Kirim Notif ke Grup
+// --- ENDPOINT NOTIF PEMBELIAN ---
 app.post('/kirim-notif-grup', async (req, res) => {
-    const { pesan } = req.body;
-    // Ganti ID Grup ini setelah kamu dapatkan via !id
-    const GROUP_ID = '1234567890@g.us'; 
+    const { nama, produk, harga } = req.body;
+    const teksPesan = `*NIDALOP-BOOT NOTIF* 🚀\n\n` +
+                      `🔥 *ADA PEMBELIAN BARU!* 🔥\n` +
+                      `👤 Buyer  : ${nama}\n` +
+                      `📦 Produk : *${produk}*\n` +
+                      `💰 Harga  : Rp ${parseInt(harga).toLocaleString('id-ID')}\n` +
+                      `━━━━━━━━━━━━━━━━━━━━━━`;
 
     try {
-        await client.sendMessage(GROUP_ID, pesan);
+        await client.sendMessage(ID_GRUP_STORE, teksPesan);
         res.json({ status: 'success' });
     } catch (err) {
         res.status(500).json({ status: 'error' });
     }
 });
 
-// Cek ID Grup otomatis
-client.on('message', async (msg) => {
-    if (msg.body === '!id') {
-        msg.reply('ID Grup: ' + msg.from);
-    }
-});
-
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-    console.log('Mesin jalan di port ' + port);
+    console.log('Mesin Ready! Silahkan request pairing via browser.');
     client.initialize();
 });
