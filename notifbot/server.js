@@ -70,23 +70,26 @@ app.get('/request-pairing', async (req, res) => {
 
 // --- ENDPOINT NOTIF PEMBELIAN GRUP ---
 app.post('/kirim-notif-grup', async (req, res) => {
-    const { nama, produk, harga } = req.body;
+    // Ambil data sesuai field yang ada di Firebase kamu
+    const { id_trx, nama, produk, harga, tanggal } = req.body;
     
-    const teksPesan = `*NIDA-NOTF | NIDALOP STORE* 🚀\n\n` +
-                      `🔥 *ADA PEMBELIAN BARU!* 🔥\n` +
+    const teksPesan = `*NIDA-NOTF | PEMBELIAN BARU* 🚀\n\n` +
+                      `🆔 *ID TRX:* ${id_trx}\n` +
+                      `👤 *Nama:* ${nama}\n` +
+                      `📦 *Produk:* ${produk}\n` +
+                      `💰 *Harga:* Rp ${parseInt(harga).toLocaleString('id-ID')}\n` +
+                      `🗓️ *Waktu:* ${tanggal}\n` +
                       `━━━━━━━━━━━━━━━━━━━━━━\n` +
-                      `👤 Buyer  : ${nama}\n` +
-                      `📦 Produk : *${produk}*\n` +
-                      `💰 Harga  : Rp ${parseInt(harga).toLocaleString('id-ID')}\n` +
-                      `✅ Status : *LUNAS*\n` +
+                      `✅ *STATUS: LUNAS & SUKSES*\n` +
                       `━━━━━━━━━━━━━━━━━━━━━━\n` +
-                      `_Pesanan sedang diproses otomatis._`;
+                      `_Terima kasih telah order di NIDALOP STORE!_`;
 
     try {
+        const ID_GRUP_STORE = "120363404036911585@g.us"; 
         await client.sendMessage(ID_GRUP_STORE, teksPesan);
         res.json({ status: 'success' });
     } catch (err) {
-        console.error('[NIDA-NOTF] Error sending message:', err);
+        console.error('[NIDA-NOTF] Gagal kirim notif:', err);
         res.status(500).json({ status: 'error' });
     }
 });
